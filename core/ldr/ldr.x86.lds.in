@@ -1,0 +1,46 @@
+/*
+ * $FILE: ldr.lds
+ *
+ * ld script to build the x86 version
+ *
+ * $VERSION$
+ *
+ * $AUTHOR$
+ *
+ * $LICENSE:
+ * COPYRIGHT (c) Fent Innovative Software Solutions S.L.
+ *     Read LICENSE.txt file for the license terms.
+ */
+
+#include <config.h>
+#include <arch/paging.h>
+
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_ARCH("i386")
+ENTRY(_start)
+
+SECTIONS
+{
+    _sldr = .;
+    . = (XM_PCTRLTAB_ADDR)-256*1024-(4096*18);
+    .bss ALIGN(8) : {
+	_sbss = .;
+	*(COMMON)
+        *(.bss)
+	_ebss = .;
+    }  
+
+    . = (XM_PCTRLTAB_ADDR)-256*1024;
+
+    .text ALIGN(8): {
+        *(.text)
+    }    
+    .data ALIGN(8) : {
+        *(.data)
+    }
+    _eldr = .;
+    /DISCARD/ : {
+        *(.note)
+        *(.comment*)
+    }
+}

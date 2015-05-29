@@ -1,0 +1,87 @@
+/*
+ * $FILE$
+ * 
+ * ld script to build sparcv8
+ * 
+ * $VERSION$
+ *
+ * $AUTHOR$
+ * 
+ * $LICENSE:
+ * COPYRIGHT (c) Fent Innovative Software Solutions S.L.
+ *     Read LICENSE.txt file for the license terms.
+ */
+
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_ARCH("i386")
+
+ENTRY(_start)
+
+START_ADDR = CONFIG_LOAD_ADDR;
+
+SECTIONS
+{
+  . = START_ADDR;
+  _srorsw = .;
+  .text ALIGN (0x1000): {  	
+  	*(.text)
+	. = ALIGN(8);
+	xmefContainerPtr = . ;
+#ifndef CONFIG_STAND_ALONE
+#if 0
+       QUAD(_scontainer);
+#endif
+       LONG(_scontainer);
+#else
+#if 0
+        QUAD(CONFIG_CONTAINER_ADDR);
+#endif
+        LONG(CONFIG_CONTAINER_ADDR);  
+#endif
+  }
+
+  .rodata ALIGN (4) : {
+	*(.rodata)
+  	*(.rodata.*)
+	*(.rodata.*.*)
+  }
+#ifndef CONFIG_STAND_ALONE
+#ifdef CONFIG_CONTAINER_AT_FIXED_ADDR
+  prev = .;
+  . = CONFIG_CONTAINER_ADDR;
+#endif
+  .container ALIGN(8) : {
+    	     _scontainer = . ;
+  	     *(.container)
+  }
+#ifdef CONFIG_CONTAINER_AT_FIXED_ADDR
+  . = prev;
+#endif
+#endif
+  _erorsw = .;
+  _srsw = .;
+  .data ALIGN (4) : {
+        _sdata = .;
+	_sdata_lma = LOADADDR(.data); 
+	*(.data)
+	_edata = .;
+	hpvEntryPoint = .;
+        LONG(0);
+  }
+  
+  .bss ALIGN (4) : {
+       _sbss = .;
+       *(COMMON)
+       *(.bss)
+       _ebss = .;
+  }
+
+   _ersw = .;
+
+  /DISCARD/ :
+  {
+	*(.note)
+	*(.comment*)
+        *(.eh_frame)
+  }
+}

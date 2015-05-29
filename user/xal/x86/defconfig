@@ -1,0 +1,17 @@
+#
+# Automatically generated make config: don't edit
+# XM version: 3.7.1
+# Tue Mar 26 15:34:34 2013
+#
+CONFIG_ARCH="x86"
+CONFIG_KERNELVERSION="3.7.1"
+CONFIG_XM_VERSION=3
+CONFIG_XM_SUBVERSION=7
+CONFIG_XM_REVISION=1
+# CONFIG_DEBUG is not set
+
+#
+# Kernel options
+#
+CONFIG_STACK_KB=8
+CONFIG_SIZE_PAGE_TABLE=16

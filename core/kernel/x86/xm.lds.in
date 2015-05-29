@@ -1,0 +1,157 @@
+/*
+ * $FILE: xm.lds
+ *
+ * ld script to build the x86 version
+ *
+ * $VERSION$
+ *
+ * $AUTHOR$
+ *
+ * $LICENSE:
+ * COPYRIGHT (c) Fent Innovative Software Solutions S.L.
+ *     Read LICENSE.txt file for the license terms.
+ */
+
+#include <config.h>
+
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_ARCH("i386")
+ENTRY(_start)
+
+PHYSOFFSET = - CONFIG_XM_OFFSET + CONFIG_XM_LOAD_ADDR;
+
+SECTIONS
+{
+    . = CONFIG_XM_LOAD_ADDR;
+    _sxm = .;
+    .sldr ALIGN(256*1024) : {
+        _sldr = .;
+        *(.ldr)
+        _eldr = .;
+    }
+    .xmHdr ALIGN(0x1000) : {
+        *(.xmHdr)
+    }
+    _sboot = .;
+    .boot_text ALIGN(0x1000) : {
+        *(.boot.text)
+    }
+    .boot_data : {
+        *(.boot.data)
+    }
+    _eboot = .;
+    
+    .xmHdr ALIGN(0x8) : {
+        *(.xmHdr)
+    }
+
+    . = . + CONFIG_XM_OFFSET - CONFIG_XM_LOAD_ADDR;
+    .vboot ALIGN(0x1000) : AT (ADDR (.vboot) + PHYSOFFSET) {
+        _svboot = .;
+        *(.vboot.text)
+        *(.vboot.data)
+        _evboot = .;
+    }
+
+    .text ALIGN(0x1000) : AT (ADDR (.text) + PHYSOFFSET) {
+        *(.text)
+    }
+
+    .rsv_hwirqs ALIGN(8) : {
+        rsvHwIrqs = .;
+        *(.rsv_hwirqs)
+        eRsvHwIrqs = .;
+    }
+
+    .rsv_ioports ALIGN(8) : {
+        rsvIoPorts = .;
+        *(.rsv_ioports)
+        eRsvIoPorts = .;
+    }
+
+    .rsv_physpages ALIGN(8) : {
+        rsvPhysPages = .;
+        *(.rsv_physpages)
+        eRsvPhysPages = .;
+    }
+
+    .rodata ALIGN(0x1000) : AT (ADDR (.rodata) + PHYSOFFSET) {
+        hypercallsTab = .;
+        *(.hypercallstab)
+        hypercallFlagsTab = .;
+        *(.hypercallflagstab)
+
+        . = ALIGN(8);
+        exPTable = .;
+        *(.exptable)
+        LONG(0);
+        LONG(0);
+
+        . = ALIGN(8);
+        __gpExTab = .;
+        *(.gp_ex_tab)
+        LONG(0);
+        
+        . = ALIGN(8);
+        kDevTab = .;
+        *(.kdevtab)
+        LONG(0);
+        . = ALIGN(8);
+	
+        kDevSetup = .;
+        *(.kdevsetup)
+        LONG(0);
+        
+        . = ALIGN(8);
+        objectSetupTab = .;
+        *(.objsetuptab)
+        LONG(0);
+        
+        . = ALIGN(8);
+        *(.rodata)
+        *(.rodata.*)
+    }
+    
+    .build_info ALIGN(8) :  AT (ADDR (.build_info) + PHYSOFFSET) {
+        buildInfo = .;
+        *(.kbuild_info)
+        *(.build_info)
+        BYTE(0);
+    }
+
+    .data ALIGN(8) :  AT (ADDR (.data) + PHYSOFFSET) {
+    	_sdata = .;
+        *(.vboot.data)
+        *(.data)
+        _edata = .;
+        sysResetCounter = .;
+        LONG(0);
+        resetStatusInit = .;
+        LONG(0);
+        _cpdata = .;
+        LONG(0);
+    }
+
+    .bss ALIGN(8) :  AT (ADDR (.bss) + PHYSOFFSET) {
+        _sbss = .;
+        *(COMMON)
+        *(.bss)
+        _ebss = .; 
+        . = ALIGN(8);
+        _scdata = .;
+        . = . + SIZEOF(.data);
+        _ecdata = .;
+        *(.bss.noinit)
+    }
+
+    . = ALIGN(4K);
+    xmcTab = .;
+    physXmcTab = . + PHYSOFFSET;
+    _exm = . + PHYSOFFSET;
+
+    /DISCARD/ : {
+        *(.note)
+        *(.comment*)
+    }
+
+}

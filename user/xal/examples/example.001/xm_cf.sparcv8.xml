@@ -1,0 +1,44 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x" version="1.0.0" name="Test_10.1">  
+  <HwDescription>
+    <MemoryLayout>
+	   <Region type="rom" start="0x0" size="4MB" />
+	   <Region type="stram" start="0x40000000" size="4MB"/>
+		<!--    <Region type="sdram" start="0x60000000" size="1MB"/>  -->
+    </MemoryLayout>
+    <ProcessorTable>
+             <Processor id="0" frequency="80Mhz">
+                
+                    <CyclicPlanTable>
+                        <Plan id="0" majorFrame="1000ms">
+                            <Slot id="0" start="0ms" duration="500ms" partitionId="0"/>
+                            <Slot id="1" start="500ms" duration="500ms" partitionId="1"/>
+                        </Plan>
+                    </CyclicPlanTable>
+                
+            </Processor>
+    </ProcessorTable>
+    <Devices>
+            <Uart id="0" baudRate="115200" name="Uart" />
+    </Devices>
+  </HwDescription>
+
+  <XMHypervisor console="Uart">
+        <PhysicalMemoryArea size="1MB"/>        
+  </XMHypervisor>
+    
+  <PartitionTable>
+        <Partition id="0" flags="system"  name="Partition1" console="Uart">
+		<PhysicalMemoryAreas>
+		<Area start="0x40100000" size="256KB"/>
+		</PhysicalMemoryAreas>
+		<TemporalRequirements duration="200ms" period="500ms"/>
+	</Partition>
+	
+        <Partition id="1" flags="" name="Partition2" console="Uart">
+		<PhysicalMemoryAreas>
+		<Area start="0x40140000" size="256KB"/>
+		</PhysicalMemoryAreas>
+		<TemporalRequirements duration="200ms" period="500ms"/>
+	</Partition>
+   </PartitionTable> 
+</SystemDescription>

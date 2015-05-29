@@ -1,0 +1,102 @@
+<SystemDescription xmlns="http://www.xtratum.org/xm-3.x" version="1.0.0" name="Test_10.1">  
+  <HwDescription>
+    <MemoryLayout>
+	   <Region type="rom" start="0x0" size="4MB" />
+	   <Region type="stram" start="0x40000000" size="8MB"/>
+		<!--    <Region type="sdram" start="0x60000000" size="1MB"/>  -->
+    </MemoryLayout>
+    <ProcessorTable>
+             <Processor id="0" frequency="100Mhz">
+                
+                    <CyclicPlanTable>
+                        <Plan id="0" majorFrame="1000ms">
+                            <Slot id="0" start="0ms" duration="500ms" partitionId="0"/>
+                            <Slot id="1" start="500ms" duration="500ms" partitionId="1"/>
+                        </Plan>
+                        <Plan id="1" majorFrame="1000ms">
+<!--                            <Slot id="0" start="0ms" duration="500ms" partitionId="0"/>-->
+                            <Slot id="0" start="500ms" duration="500ms" partitionId="1"/>
+                        </Plan>
+                    </CyclicPlanTable>
+                
+            </Processor>
+    </ProcessorTable>
+    <Devices>
+            <Uart id="0" baudRate="115200" name="Uart" />
+            <TTnocPort ttsocId="1" name="ttnoc0" type="source" size="256B"/>
+            <TTnocPort ttsocId="2" name="ttnoc1" type="destination" size="256B"/>
+<!--            <TTnocPort ttsocId="3" name="ttnoc2" type="source" size="256B"/>
+            <TTnocPort ttsocId="4" name="ttnoc3" type="destination" size="256B"/>-->
+            <MemoryBlock name="MemUART" start="0x40300000" size="256KB" />
+            <MemoryBlock name="MemDisk0" start="0x40400000" size="256KB" />
+            <MemoryBlock name="MemDisk1" start="0x40440000" size="256KB" />
+    </Devices>
+  </HwDescription>
+
+  <XMHypervisor console="Uart" nodeId="0">
+        <PhysicalMemoryArea size="1MB"/>
+        <TTnocLinks>
+           <Link nodeId="1" txPort="ttnoc0" rxPort="ttnoc1"/>        
+<!--           <Link nodeId="2" txPort="ttnoc2" rxPort="ttnoc3"/>-->
+        </TTnocLinks>
+  </XMHypervisor>
+    
+  <PartitionTable>
+        <Partition id="0" flags="system"  name="Partition1" console="Uart">
+	     <PhysicalMemoryAreas>
+		    <Area start="0x40100000" size="256KB"/>
+	     </PhysicalMemoryAreas>
+             <PortTable>
+                <Port type="queuing" direction="source" name="portQ"/>
+                <Port type="sampling" direction="source" name="portS"/>
+                <Port type="ttnoc" direction="source" name="ttnocSend1"/>
+                <Port type="ttnoc" direction="destination" name="ttnocReceive1"/>
+<!--                <Port type="ttnoc" direction="source" name="ttnocSend2"/>-->
+                <Port type="queuing" direction="destination" name="portQ2"/>
+                <Port type="sampling" direction="destination" name="portS2"/>
+            </PortTable>
+            <Trace bitmask="0x01" device="MemDisk0"/>
+	</Partition>
+	
+        <Partition id="1" flags="system" name="Partition2" console="Uart">
+		<PhysicalMemoryAreas>
+		    <Area start="0x40140000" size="256KB"/>
+		</PhysicalMemoryAreas>
+              <PortTable>
+                <Port type="sampling" direction="destination" name="portS"/>
+                <Port type="queuing" direction="destination" name="portQ"/>
+<!--                <Port type="ttnoc" direction="source" name="ttnocSend3"/>-->
+                <Port type="ttnoc" direction="destination" name="ttnocReceive2"/>
+<!--                <Port type="ttnoc" direction="destination" name="ttnocReceive3"/>-->
+            </PortTable>
+            <Trace bitmask="0x01" device="MemDisk1"/>
+	</Partition>
+   </PartitionTable> 
+    <Channels>
+        <QueuingChannel maxNoMessages="16" maxMessageLength="128B">
+            <Source partitionId="0" portName="portQ"/>
+<!--            <Destination partitionId="0" portName="portQ2"/>-->
+            <Destination partitionId="1" portName="portQ"/>
+        </QueuingChannel>
+        <SamplingChannel maxMessageLength="128B">
+            <Source partitionId="0" portName="portS"/>
+            <Destination partitionId="0" portName="portS2"/>
+            <Destination partitionId="1" portName="portS"/>
+        </SamplingChannel>
+        <TTnocChannel maxMessageLength="26B" nodeId="1">
+            <Source partitionId="0" portName="ttnocSend1" device="ttnoc0"/>
+            <Destination partitionId="0" portName="ttnocReceive1" device="ttnoc1"/>
+            <Destination partitionId="1" portName="ttnocReceive2" device="ttnoc1"/>
+        </TTnocChannel>
+<!--
+        <TTnocChannel maxMessageLength="26B" nodeId="2">
+            <Source partitionId="1" portName="ttnocSend3" device="ttnoc2"/>
+            <Destination partitionId="1" portName="ttnocReceive3" device="ttnoc3"/>
+        </TTnocChannel>
+-->
+    </Channels>
+</SystemDescription>
+
+
+
+

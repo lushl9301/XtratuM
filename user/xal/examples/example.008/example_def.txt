@@ -1,0 +1,30 @@
+# Example : example.008
+
+# Description
+This example shows TTNoC functions
+
+# Partition definition
+There are two partitions on node 0 and node1.
+P0 will open a ttnoc port and exchange messages with the node 1.
+P1 obtains information from a remote node and send commands to change the status of remote partitions and hypervisor.
+
+# Configuration table
+Basic configuration. Partitions are defined to be executed at different memory addresses.
+
+Two scheduling plan is defined under the following premises:
+
+Plan 0:
+MAF = 1000 msec 		
+P0: S   0 ms  D 500 ms  
+P1: S 500 ms  D 500 ms  
+
+Plan 1:
+MAF = 1000 msec
+P1: S 500 ms  D 500 ms
+
+# Expected results
+\xm{} will load, initialise and run in user mode the partitions. 
+During the execution, P0 exchanges messages with node 1.
+P1 obtain information about remote node 1, changes the status of the remote partition 0. switches the scheduling plan and
+changes the status of the remote hypervisor.
+

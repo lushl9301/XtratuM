@@ -1,0 +1,88 @@
+XtratuM LICENSE
+
+Fent Innovative Software Solutions is willing to license the software
+identified below to you only upon the condition that you accept all of the terms
+contained in this license agreement. Please read the agreement carefully. By
+using the software you acknowledge that you have read the terms and agree to
+them. 
+
+=> Definitions
+
+-LICENSOR
+
+Fent Innovative Software Solutions (FENTISS). 
+Hereinafter called: ``LICENSOR''.
+
+
+Ciudad Politécnica de la Innovación
+Camino de Vera s/n
+CP: 46022, Valencia, Spain
+
+-LICENSEE
+
+Hereinafter called: ``LICENSEE''.
+IKERLAN S.COOP. (IKERLAN-IK4)
+TECHNISCHE UNIVERSITAET WIEN (TU WIEN)
+UNIVERSIDAD POLITECNICA DE MADRID (UPM)
+UNIVERSIDAD POLITECNICA DE VALENCIA (UPV)
+TRIALOG
+TELETEL S.A. - TELECOMMUNICATIONS AND INFORMATION TECHNOLOGY (TELETEL)
+VISUAL TOOLS SA
+ALSTOM WIND S.L
+
+Partners in the frame of the project Multi-cores Partitioning for Trusted Embedded Systems.
+
+-PROJECT
+Hereinafter called: ``PROJECT''.
+ 
+Multi-cores Partitioning for Trusted Embedded Systems\\
+Project acronym: MultiPARTES.
+(Grant agreement No. 287702)
+
+-SOFTWARE
+
+XtratuM version 3.7.x for x86 and Sparcv8 architectures. 
+It is considered a developing version.
+
+Hereinafter referred to the "SOFTWARE."
+
+=> License
+
+-Developing version
+
+  * The LICENSOR grants to the LICENSEE a limited, non-exclusive, non-transferable license to use the SOFTWARE in accordance with the terms and conditions of this Agreement, 
+    for the sole purpose of performing tasks allocated to LICENSEE within the PROJECT.
+
+  * The SOFTWARE is provided in source code form.
+
+  * The LICENSEE may not distribute the SOFTWARE in source code form. 
+
+  * The SOFWARE is licensed free of charge to the LICENSEE for use in accordance with the terms and conditions of this Agreement.
+
+  * This License does not entitle LICENSEE technical support, telephone
+    assistance, enhancements or updates to the SOFTWARE.
+
+  * This License Agreement is valid without LICENSOR's signature. It becomes
+    effective upon the earlier of LICENSEE's signature or LICENSEE's use of the
+    SOFTWARE.
+
+-Final release
+
+The final release at the end of the PROJECT of the SOFTWARE will be
+version 3.8.0.
+
+This version will be will publically licensed under the GPL version. For
+LICENSEE, it will be released as GPL version  with the explicit consideration that the code
+that makes use of the XtratuM services do not fall under the category of derived work.
+
+=> Intellectual property rights and limitation on use}
+
+
+  * Any copyright, title to SOFTWARE and all other intellectual property
+    rights or other proprietary rights in SOFTWARE shall remain the absolute
+    property of the LICENSOR. The LICENSEE shall not acquire any title, copyright or other proprietary rights in SOFTWARE.  
+
+
+Note: A complete Software License Agreement was distributed in the frame of the project.
+
+

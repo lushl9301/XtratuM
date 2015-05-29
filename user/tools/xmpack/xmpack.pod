@@ -1,0 +1,123 @@
+=head1 NAME
+
+B<xmpack> - create an XtratuM system image container
+
+=head1 SYNOPSIS
+
+B<xmpack> B<build> -h F<xm_file>[@I<offset>]:F<conf_file>[@I<offset>] [-p I<id>:F<part_file>[@I<offset>][:F<custom_file>[@I<offset>]]*]+ F<container>
+
+B<xmpack> B<list> -c F<container>
+
+
+=head1 DESCRIPTION
+
+C<xmpack> manipulates the XtratuM system container. The container is a simple
+filesystem designed to contain the XtratuM hypervisor core and zero or more XEF
+files. The container is an envelope to deploy all the system (hypervisor and
+partitions) from the host to the target. At boot time, the resident software is in
+charge of reading the contents of the container and coping the components to the RAM
+areas where the hypervisor and he partitions will be executed. Note that XtratuM has
+no knowledge about the container structure.
+
+The container is organised as a list of I<components>. Each component is a list of
+XEF files. A component is used to store an executable unit, which can be: the XtratuM
+hypervisor or a partition. Each component is a list of one or more files. The first
+file shall be a valid XtratuM image (see the XtratuM binary file header) with the
+configuration file (once parsed and compiled into XEF format). The rest of the
+components are optional.
+
+C<xmpack> is a helper utility that can be used to deploy an XtratuM system. It is not
+mandatory to use this tool to deploy the application (hypervisor and the partitions)
+in the target machine.
+
+The following checks are done:
+
+=over 4
+
+=item * The binary image of the partitions fits into the allocated memory (as defined in the XM_CF).
+
+=item * The size of the customisation files fits into the area reserved by each partition.
+
+=item * The memory allocated to XtratuM is big enough to hold the XtratuM image plus
+the configuration file.
+
+=back
+
+=over 4
+
+=item B<build> 
+
+
+A new I<container> is created. Two kind of components can be defined: 
+
+=over
+ 
+=item B<-h> to create an [H]ypervisor component: 
+
+The hypervisor entry is composed of the name of the XtratuM xef file and the binary
+configuration file (the result of processing the XM_CF file).
+
+
+=item B<-p> to create a [P]artition. The partition entries are composed of:
+
+The I<id> of the partition, as specified in the XM_CF file. Note that this is the
+mechanism to bind the configuration description with the actual image of the
+partition. The F<part_file> which shall contains the executable image. And zero
+or more F<custom_file>s. There shall be the same number of customisation files than
+that specified in the field C<noCustomFiles> of the C<xmImageHdr> structure.
+
+=back
+
+
+The elements that are part of each component are separated by ":".
+
+By default, C<xmpack> stores the files sequentially in the container. If the
+I<offset> parameter is specified, then the file is placed at the given offset. The
+offset is defined with respect to the start of the container.  The specified offset
+shall not overlap with existing data. The remaining files of the container will be
+placed after the end of this file.
+
+
+
+=item B<list> 
+
+Shows the contents (components and the files of each component) of a container. If
+the option B<-c> is given, the blocks allocated to each file are also shown.
+
+
+=back
+
+=head1 USAGE EXAMPLES
+
+A new container with one hypervisor and one booting partition. The hypervisor
+  container has two files: the hypervisor binary and the configuration table:
+
+  $ xmpack build build -h ../core/xm_core.bin:xm_ct.bin -p partition1.bin -o container
+
+The same example but the second container has now two files: the partition
+image and a customisation file:
+
+  $ xmpack/xmpack build -h ../core/xm_core.bin:xm_cf.bin \
+                        -p partition1.bin:p1.cfg \
+			-p partition2.bin:p2.cfg container.bin
+
+
+
+List the contents of the container:
+
+  $ xmpack list container.bin
+  <Package file="container.bin" version="1.0.0">
+    <XMHypervisor file="../core/xm_core.bin" fileSize="97188" offset="0x0" size="97192" >
+        <Module file="xm_cf.bin" size="8976" />
+    </XMHypervisor>
+    <Partition file="partition1.bin" fileSize="29996" offset="0x19eb8" size="30000" >
+        <Module file="p1.cfg" size="16" />
+    </Partition>
+    <Partition file="partition2.bin" fileSize="30292" offset="0x213f8" size="30296" >
+        <Module file="p2.cfg" size="16" />
+    </Partition>
+  </Package>
+
+
+
+

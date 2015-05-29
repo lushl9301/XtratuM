@@ -1,0 +1,88 @@
+/*
+ * $FILE$
+ * 
+ * ld script to build sparcv8
+ * 
+ * $VERSION$
+ *
+ * $AUTHOR$
+ * 
+ * $LICENSE:
+ * COPYRIGHT (c) Fent Innovative Software Solutions S.L.
+ *     Read LICENSE.txt file for the license terms.
+ */
+
+#ifdef sparc
+#undef sparc
+#endif
+
+OUTPUT_FORMAT("elf32-sparc", "elf32-sparc", "elf32-sparc")
+OUTPUT_ARCH(sparc)
+ENTRY(_start)
+
+SECTIONS
+{
+  . = CONFIG_RDONLY_SEC_ADDR;	// START_ADDR
+  _srorsw = .;
+  .text ALIGN (0x1000): {  	
+	*(.traptab)
+  	*(.text)
+	. = ALIGN(8);
+	xmefContainerPtr = . ;
+#ifndef CONFIG_STAND_ALONE
+	LONG(_scontainer);
+#else
+	LONG(CONFIG_CONTAINER_ADDR);
+#endif
+  }
+
+  .rodata ALIGN (8) : {
+	*(.rodata)
+  	*(.rodata.*)
+	*(.rodata.*.*)
+  }
+
+#ifndef CONFIG_STAND_ALONE
+#ifdef CONFIG_CONTAINER_AT_FIXED_ADDR
+  prev = .;
+  . = CONFIG_CONTAINER_ADDR;
+#endif
+  .container ALIGN(8) : {
+    	     _scontainer = . ;
+  	     *(.container)
+  }
+
+#ifdef CONFIG_CONTAINER_AT_FIXED_ADDR
+  . = prev;
+#endif
+#endif
+
+  _erorsw = .;
+
+  . = CONFIG_RW_SEC_ADDR;	// DATA_ADDR
+  _srsw = .;
+
+  .data ALIGN (8) : AT ( ADDR (.container) + SIZEOF (.container)) {
+        _sdata = .;
+	_sdata_lma = LOADADDR(.data); 
+	*(.data)
+	_edata = .;
+        hpvEntryPoint = .;
+        LONG(0);
+  }
+  
+  .bss ALIGN (8) : {
+       _sbss = .;
+       *(COMMON)
+       *(.bss)
+       _ebss = .;
+  }
+
+   _ersw = .;
+
+  /DISCARD/ :
+  {
+	*(.note)
+	*(.comment*)
+  }
+}

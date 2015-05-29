@@ -1,0 +1,11 @@
+
+
+= Directory structure =
+
+core:     The source code of the XtratuM hypervisor.
+scripts:  Helping tools to configure XtratuM source code.
+user:     User space utilities (libxm, tools, examples, etc).
+
+
+
+
