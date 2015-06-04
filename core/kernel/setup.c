@@ -96,7 +96,7 @@ extern __NOINLINE void FreeBootMem(void);
 
 void IdleTask(void)
 {
-	while(1) {
+	while (1) {
 		DoPreemption();
 	}
 }
@@ -136,7 +136,7 @@ void ResetSystem(xm_u32_t resetMode)
 #ifdef CONFIG_AUDIT_EVENTS
 	RaiseAuditEvent(TRACE_SCHED_MODULE, AUDIT_SCHED_HYP_RESET, 1, (xmWord_t *)&resetMode);
 #endif
-	if((resetMode & XM_RESET_MODE) == XM_WARM_RESET) {
+	if ((resetMode & XM_RESET_MODE) == XM_WARM_RESET) {
 		_Reset((xmAddress_t)start);
 	} else { // Cold Reset
 		sysResetCounter[0] = 0;
@@ -149,7 +149,7 @@ void ResetSystem(xm_u32_t resetMode)
 static void __VBOOT CreateLocalInfo(void)
 {
 	xm_s32_t e;
-	if(!GET_NRCPUS()) {
+	if (!GET_NRCPUS()) {
 		cpuCtxt_t ctxt;
 		GetCpuCtxt(&ctxt);
 		SystemPanic(&ctxt, "No cpu found in the system\n");
@@ -157,7 +157,7 @@ static void __VBOOT CreateLocalInfo(void)
 	memset(localCpuInfo, 0, sizeof(localCpu_t) * CONFIG_NO_CPUS);
 	memset(localTimeInfo, 0, sizeof(localTime_t) * CONFIG_NO_CPUS);
 	memset(localSchedInfo, 0, sizeof(localSched_t) * CONFIG_NO_CPUS);
-	for(e = 0; e < CONFIG_NO_CPUS; e++)
+	for (e = 0; e < CONFIG_NO_CPUS; e++)
 		localCpuInfo[e].globalIrqMask = ~0;
 }
 
@@ -189,16 +189,16 @@ static void __VBOOT SetupPartitions(void)
 	kprintf("%d Partition(s) created\n", xmcTab.noPartitions);
 
 	// Creating the partitions
-	for(e = 0; e < xmcTab.noPartitions; e++) {
-		if((p = CreatePartition(&xmcPartitionTab[e]))) {
+	for (e = 0; e < xmcTab.noPartitions; e++) {
+		if ((p = CreatePartition(&xmcPartitionTab[e]))) {
 			kprintf("P%d (\"%s\":%d:%d) flags: [", e, &xmcStringTab[xmcPartitionTab[e].nameOffset],
 					xmcPartitionTab[e].id, xmcPartitionTab[e].noVCpus);
-			if(xmcPartitionTab[e].flags & XM_PART_SYSTEM)
+			if (xmcPartitionTab[e].flags & XM_PART_SYSTEM)
 				kprintf(" SYSTEM");
-			if(xmcPartitionTab[e].flags & XM_PART_FP)
+			if (xmcPartitionTab[e].flags & XM_PART_FP)
 				kprintf(" FP");
 			kprintf(" ]:\n");
-			for(a = 0; a < xmcPartitionTab[e].noPhysicalMemoryAreas; a++) {
+			for (a = 0; a < xmcPartitionTab[e].noPhysicalMemoryAreas; a++) {
 				st = xmcPhysMemAreaTab[a + xmcPartitionTab[e].physicalMemoryAreasOffset].startAddr;
 				end = st + xmcPhysMemAreaTab[a + xmcPartitionTab[e].physicalMemoryAreasOffset].size - 1;
 				vSt = xmcPhysMemAreaTab[a + xmcPartitionTab[e].physicalMemoryAreasOffset].mappedAt;
@@ -211,8 +211,8 @@ static void __VBOOT SetupPartitions(void)
 				kprintf("\n");
 			}
 
-			if(xmcBootPartTab[e].flags & XM_PART_BOOT) {
-				if(ResetPartition(p, XM_COLD_RESET, resetStatusInit[0]) < 0)
+			if (xmcBootPartTab[e].flags & XM_PART_BOOT) {
+				if (ResetPartition(p, XM_COLD_RESET, resetStatusInit[0]) < 0)
 					kprintf("Unable to reset partition %d\n", p->cfg->id);
 				p->opMode = XM_OPMODE_IDLE;
 			}
@@ -247,7 +247,7 @@ static void __VBOOT SetupPartitions(void)
 static void __VBOOT LoadCfgTab(void)
 {
 	// Check configuration file
-	if(xmcTab.signature != XMC_SIGNATURE)
+	if (xmcTab.signature != XMC_SIGNATURE)
 		HaltSystem();
 #define CALC_ABS_ADDR_XMC(_offset) (void *)(xmcTab._offset+(xmAddress_t)&xmcTab)
 
