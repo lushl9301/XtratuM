@@ -20,22 +20,22 @@
 .global _start, start
 _start: 
 start:
-        set partCtrlTabPtr, %g2
-        st %g1, [%g2]
+	set partCtrlTabPtr, %g2
+	st %g1, [%g2]
 
-        set stack, %fp
-        set STACK_SIZE-8, %g1
-        add %fp, %g1, %fp
-        mov %g1, %o0
-        call MainLdr
-        sub %fp, MIN_STACK_FRAME, %sp
-        
-        set partCtrlTabPtr, %g2
-        ld [%g2], %g1
-        jmp %o0
-        nop
+	set stack, %fp
+	set STACK_SIZE-8, %g1
+	add %fp, %g1, %fp
+	mov %g1, %o0
+	call MainLdr
+	sub %fp, MIN_STACK_FRAME, %sp
+
+	set partCtrlTabPtr, %g2
+	ld [%g2], %g1
+	jmp %o0
+	nop
 1:      b 1b
-        nop
+	nop
 
 .common stack,STACK_SIZE,8
 #endif
@@ -44,15 +44,15 @@ start:
 .global _start, start
 _start:
 start:
-        movl %ebx, partCtrlTabPtr
-        movl $eStack, %esp
-        call MainLdr
-        movl partCtrlTabPtr, %ebx
-        jmp *%eax
+	movl %ebx, partCtrlTabPtr
+	movl $eStack, %esp
+	call MainLdr
+	movl partCtrlTabPtr, %ebx
+	jmp *%eax
 1:
-        jmp 1b
+	jmp 1b
 .bss
 sStack:
-        .zero STACK_SIZE
+	.zero STACK_SIZE
 eStack:
 #endif
