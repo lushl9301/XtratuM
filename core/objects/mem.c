@@ -62,29 +62,29 @@ static inline xm_s32_t CopyArea(xmAddress_t dstAddr, xmId_t dstId, xmAddress_t s
     return size;
 }
 
-static xm_s32_t CtrlMem(xmObjDesc_t desc, xm_u32_t cmd, union memCmd *__gParam args) {
-    if (!args)
+static xm_s32_t CtrlMem(xmObjDesc_t desc, xm_u32_t cmd, union memCmd *__gParam args)
+{
+	if (!args)
+		return XM_INVALID_PARAM;
+
+	if (CheckGParam(args, sizeof(union memCmd), 4, PFLAG_NOT_NULL) < 0)
+		return XM_INVALID_PARAM;
+
+	switch (cmd) {
+	case XM_OBJ_MEM_CPY_AREA:
+		return CopyArea(args->cpyArea.dstAddr, args->cpyArea.dstId, args->cpyArea.srcAddr, args->cpyArea.srcId,
+				args->cpyArea.size);
+	}
+
 	return XM_INVALID_PARAM;
-
-    if (CheckGParam(args, sizeof(union memCmd), 4, PFLAG_NOT_NULL)<0) 
-        return XM_INVALID_PARAM;
-
-    switch(cmd) {
-    case XM_OBJ_MEM_CPY_AREA:
-        return CopyArea(args->cpyArea.dstAddr, args->cpyArea.dstId, args->cpyArea.srcAddr, args->cpyArea.srcId, args->cpyArea.size);
-     }
-
-    return XM_INVALID_PARAM;
 }
 
-static const struct object memObj={
-    .Ctrl=(ctrlObjOp_t)CtrlMem,
-};
+static const struct object memObj = {.Ctrl = (ctrlObjOp_t)CtrlMem, };
 
-xm_s32_t __VBOOT SetupMem(void) {
-    objectTab[OBJ_CLASS_MEM]=&memObj;
-    return 0;
+xm_s32_t __VBOOT SetupMem(void)
+{
+	objectTab[OBJ_CLASS_MEM] = &memObj;
+	return 0;
 }
 
 REGISTER_OBJ(SetupMem);
-
