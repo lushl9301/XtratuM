@@ -14,6 +14,7 @@
 
 #ifndef _XM_STDC_H_
 #define _XM_STDC_H_
+#define _XM_KERNEL_
 
 #ifdef _XM_KERNEL_
 #include <linkage.h>
