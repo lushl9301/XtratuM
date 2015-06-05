@@ -29,15 +29,15 @@
 #ifdef CONFIG_MMU
 static inline xm_s32_t CheckGParam(void *param, xmSize_t size, xm_u32_t aligment, xm_s32_t flags) {
 
-    if ((flags&PFLAG_NOT_NULL)&&!param)
-        return -1;
-    
-    if (((xmAddress_t)param>=CONFIG_XM_OFFSET)||
-        ((xmAddress_t)param+size>=CONFIG_XM_OFFSET))
-        return -1;
+	if ((flags&PFLAG_NOT_NULL)&&!param)
+	return -1;
 
-    return ((flags&PFLAG_RW)?AsmRWCheck((xmAddress_t)param, size, aligment):
-            AsmROnlyCheck((xmAddress_t)param, size, aligment));
+	if (((xmAddress_t)param>=CONFIG_XM_OFFSET)||
+			((xmAddress_t)param+size>=CONFIG_XM_OFFSET))
+	return -1;
+
+	return ((flags&PFLAG_RW)?AsmRWCheck((xmAddress_t)param, size, aligment):
+			AsmROnlyCheck((xmAddress_t)param, size, aligment));
 }
 
 #else // CONFIG_MPU
