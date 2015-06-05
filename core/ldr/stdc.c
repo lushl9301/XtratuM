@@ -25,8 +25,7 @@ void *memmove(void *dest, void *src, unsigned long count)
 void *memset(void *dst, xm_s32_t s, unsigned long count)
 {
 	register xm_s8_t *a = dst;
-	count++;
-	while (--count)
+	while (count--)
 		*a++ = s;
 	return dst;
 }
@@ -35,11 +34,8 @@ void *memcpy(void *dst, const void *src, unsigned long count)
 {
 	register xm_s8_t *d = dst;
 	register const xm_s8_t *s = src;
-	++count;
-	while (--count) {
-		*d = *s;
-		++d;
-		++s;
+	while (count--) {
+		*d++ = *s++;
 	}
 	return dst;
 }
