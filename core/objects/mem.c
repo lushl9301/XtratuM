@@ -57,9 +57,6 @@ static inline xm_s32_t CopyArea(xmAddress_t dstAddr, xmId_t dstId, xmAddress_t s
 
 	}
 
-	if (size <= 0)
-		return 0;
-
 	UnalignMemCpy((void *)dstAddr, (void*)srcAddr, size, (RdMem_t)ReadByPassMmuWord, (RdMem_t)ReadByPassMmuWord,
 			(WrMem_t)WriteByPassMmuWord);
 
