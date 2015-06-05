@@ -14,6 +14,7 @@
 
 #ifndef _XM_SCHED_H_
 #define _XM_SCHED_H_
+#define _XM_KERNEL_
 
 #ifdef CONFIG_FP_SCHED
 #define MaxPriorityFP() 0
