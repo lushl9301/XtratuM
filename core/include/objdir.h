@@ -15,6 +15,7 @@
 #ifndef _XM_OBJDIR_H_
 #define _XM_OBJDIR_H_
 
+#define _XM_KERNEL_
 typedef xm_u32_t xmObjDesc_t;
 // Object descriptor:
 // VALIDITY  | CLASS| vCPUID | PARTITIONID | ID

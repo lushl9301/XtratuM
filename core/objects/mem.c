@@ -81,7 +81,7 @@ static const struct object memObj={
     .Ctrl=(ctrlObjOp_t)CtrlMem,
 };
 
-xm_s32_t __VBOOT SetupMem(void) {    
+xm_s32_t __VBOOT SetupMem(void) {
     objectTab[OBJ_CLASS_MEM]=&memObj;
     return 0;
 }
