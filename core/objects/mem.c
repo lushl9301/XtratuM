@@ -22,44 +22,48 @@
 
 #include <objects/mem.h>
 
-static inline xm_s32_t CopyArea(xmAddress_t dstAddr, xmId_t dstId, xmAddress_t srcAddr, xmId_t srcId, xmSSize_t size) {
-    localSched_t *sched=GET_LOCAL_SCHED();
-    xm_u32_t flags;
+static inline xm_s32_t CopyArea(xmAddress_t dstAddr, xmId_t dstId, xmAddress_t srcAddr, xmId_t srcId, xmSSize_t size)
+{
+	localSched_t *sched = GET_LOCAL_SCHED();
+	xm_u32_t flags;
 
-    if (size<=0) return 0;
-    if (dstId!=KID2PARTID(sched->cKThread->ctrl.g->id))
-        if (!(GetPartition(sched->cKThread)->cfg->flags&XM_PART_SYSTEM))
-            return XM_PERM_ERROR;
+	if (size <= 0)
+		return 0;
+	if (dstId != KID2PARTID(sched->cKThread->ctrl.g->id))
+		if (!(GetPartition(sched->cKThread)->cfg->flags & XM_PART_SYSTEM))
+			return XM_PERM_ERROR;
 
-    if (srcId!=KID2PARTID(sched->cKThread->ctrl.g->id))
-        if (!(GetPartition(sched->cKThread)->cfg->flags&XM_PART_SYSTEM))
-            return XM_PERM_ERROR;
-    
-    if (dstId!=UNCHECKED_ID) {
-        if ((dstId<0)||(dstId>=xmcTab.noPartitions))
-            return XM_INVALID_PARAM;
+	if (srcId != KID2PARTID(sched->cKThread->ctrl.g->id))
+		if (!(GetPartition(sched->cKThread)->cfg->flags & XM_PART_SYSTEM))
+			return XM_PERM_ERROR;
 
-        if (!PmmFindArea(dstAddr, size, (dstId!=UNCHECKED_ID)?&partitionTab[dstId]:0, &flags))
-            return XM_INVALID_PARAM;
+	if (dstId != UNCHECKED_ID) {
+		if ((dstId < 0) || (dstId >= xmcTab.noPartitions))
+			return XM_INVALID_PARAM;
 
-        if (flags&XM_MEM_AREA_READONLY)
-            return XM_INVALID_PARAM;
-    }
-    
-    if (srcId!=UNCHECKED_ID) {
-        if ((srcId<0)||(srcId>=xmcTab.noPartitions))
-            return XM_INVALID_PARAM;
+		if (!PmmFindArea(dstAddr, size, (dstId != UNCHECKED_ID) ? &partitionTab[dstId] : 0, &flags))
+			return XM_INVALID_PARAM;
 
-        if (!PmmFindArea(srcAddr, size, (srcId!=UNCHECKED_ID)?&partitionTab[srcId]:0, &flags))
-            return XM_INVALID_PARAM;
+		if (flags & XM_MEM_AREA_READONLY)
+			return XM_INVALID_PARAM;
+	}
 
-    }
-    
-    if (size<=0) return 0;
+	if (srcId != UNCHECKED_ID) {
+		if ((srcId < 0) || (srcId >= xmcTab.noPartitions))
+			return XM_INVALID_PARAM;
 
-    UnalignMemCpy((void *)dstAddr, (void*)srcAddr, size, (RdMem_t)ReadByPassMmuWord, (RdMem_t)ReadByPassMmuWord, (WrMem_t)WriteByPassMmuWord);
-    
-    return size;
+		if (!PmmFindArea(srcAddr, size, (srcId != UNCHECKED_ID) ? &partitionTab[srcId] : 0, &flags))
+			return XM_INVALID_PARAM;
+
+	}
+
+	if (size <= 0)
+		return 0;
+
+	UnalignMemCpy((void *)dstAddr, (void*)srcAddr, size, (RdMem_t)ReadByPassMmuWord, (RdMem_t)ReadByPassMmuWord,
+			(WrMem_t)WriteByPassMmuWord);
+
+	return size;
 }
 
 static xm_s32_t CtrlMem(xmObjDesc_t desc, xm_u32_t cmd, union memCmd *__gParam args)
