@@ -22,13 +22,14 @@
 #include <vmmap.h>
 #include <virtmm.h>
 
-__NOINLINE void FreeBootMem(void) {
-    extern barrier_t smpStartBarrier;
-    extern void IdleTask(void);
-    ASSERT(!HwIsSti());
-    BarrierUnlock(&smpStartBarrier);
-    GET_LOCAL_SCHED()->flags|=LOCAL_SCHED_ENABLED;
-    Schedule();
-    IdleTask();
+__NOINLINE void FreeBootMem(void)
+{
+	extern barrier_t smpStartBarrier;
+	extern void IdleTask(void);
+	ASSERT(!HwIsSti());
+	BarrierUnlock(&smpStartBarrier);
+	GET_LOCAL_SCHED()->flags |= LOCAL_SCHED_ENABLED;
+	Schedule();
+	IdleTask();
 }
 
