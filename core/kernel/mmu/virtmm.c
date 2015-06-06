@@ -34,7 +34,7 @@ xmAddress_t VmmAlloc(xm_s32_t nPag)
 	if ((noFrames - nPag) < 0)
 		return 0;
 	vAddr = vmmStartAddr;
-	vmmStartAddr += (nPag << PAGE_SHIFT);
+	vmmStartAddr += (nPag << PAGE_SHIFT); ///??? strange operation
 	noFrames -= nPag;
 	ASSERT(noFrames>=0);
 	return vAddr;
