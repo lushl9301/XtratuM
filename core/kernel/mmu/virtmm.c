@@ -59,7 +59,7 @@ void __VBOOT SetupVirtMM(void)
 	end = st + xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].size - 1;
 	flags = xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].flags;
 	eprintf("XM map: [0x%"PRNT_ADDR_FMT"x - 0x%"PRNT_ADDR_FMT"x] flags: 0x%x\n", st, end, flags);
-    		ASSERT(st==CONFIG_XM_LOAD_ADDR);
+	ASSERT(st==CONFIG_XM_LOAD_ADDR);
 	SetupVmMap(&vmmStartAddr, &noFrames);
 	eprintf("[VMM] Free [0x%"PRNT_ADDR_FMT"x-0x%"PRNT_ADDR_FMT"x] %d frames\n", vmmStartAddr, XM_VMAPEND, noFrames);
 }
