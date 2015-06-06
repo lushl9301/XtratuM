@@ -33,7 +33,9 @@ extern void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags);
 extern void VmUnmapPage(xmAddress_t vAddr);
 extern void CloneXMPtdL1(xmWord_t *ptdL1);
 extern void SetupPtdL1(xmWord_t *ptdL1, kThread_t *k);
-extern xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAddress_t vAddr, xm_u32_t flags, xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *), xmAddress_t *pool, xmSSize_t *poolSize) __WARN_UNUSED_RESULT;
+extern xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAddress_t vAddr, xm_u32_t flags,
+		xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *),
+		xmAddress_t *pool, xmSSize_t *poolSize) __WARN_UNUSED_RESULT;
 extern xm_u32_t VmArchAttr2Attr(xm_u32_t entry);
 extern xm_u32_t VmAttr2ArchAttr(xm_u32_t entry);
 
