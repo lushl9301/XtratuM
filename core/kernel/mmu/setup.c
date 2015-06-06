@@ -29,7 +29,7 @@ __NOINLINE void FreeBootMem(void)
 	ASSERT(!HwIsSti());
 	BarrierUnlock(&smpStartBarrier);
 	GET_LOCAL_SCHED()->flags |= LOCAL_SCHED_ENABLED;
-	Schedule();
+	Schedule(); ///??? is this what David said?
 	IdleTask();
 }
 
