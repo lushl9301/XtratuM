@@ -24,7 +24,7 @@
 #include <arch/xm_def.h>
 #include <arch/processor.h>
 
-void __VBOOT SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames) {
+void _VBOOT SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames) {
     xmAddress_t st, end, page;
     xmAddress_t *rsvPages;
     xm_s32_t e, noPages;
@@ -33,8 +33,8 @@ void __VBOOT SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames) {
     st=xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].startAddr;
     end=st+xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].size-1;
 
-    *stFrameArea=ROUNDUP(_PHYS2VIRT(end+1), LPAGE_SIZE);
-    *noFrames=((XM_VMAPEND-*stFrameArea)+1)/PAGE_SIZE;
+    *stFrameArea=ROUNDUP(_PHYS2VIRT(end+1), LPAGE_SIZE); // LPAGE_SIZE = 4*1024*1024
+    *noFrames=((XM_VMAPEND-*stFrameArea)+1)/PAGE_SIZE; // PAGE_SIZE = 4096
 
     pgTable = (xm_u32_t *)_PHYS2VIRT(SaveCr3());
     for (page=_PHYS2VIRT(st); page<_PHYS2VIRT(end); page+=LPAGE_SIZE) {
