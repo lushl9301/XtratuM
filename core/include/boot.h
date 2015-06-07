@@ -20,6 +20,10 @@
 #endif
 
 #include <kthread.h>
+/*
+ * __vboot and __boot are used to let compiler put function into different
+ * sections
+ */
 
 #define __VBOOT __attribute__ ((__section__ (".vboot.text")))
 #define __VBOOTDATA __attribute__ ((__section__ (".vboot.data")))
