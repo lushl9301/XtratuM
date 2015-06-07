@@ -42,8 +42,8 @@
 
 #ifdef _XM_KERNEL_
 #ifndef __ASSEMBLY__
-#define _VIRT2PHYS(x) ((xm_u32_t)(x)-CONFIG_XM_OFFSET+CONFIG_XM_LOAD_ADDR)
-#define _PHYS2VIRT(x) ((xm_u32_t)(x)+CONFIG_XM_OFFSET-CONFIG_XM_LOAD_ADDR)
+#define _VIRT2PHYS(x) ((xm_u32_t)(x)-CONFIG_XM_OFFSET+CONFIG_XM_LOAD_ADDR) // LAddr = 0x1000000 XM_OFFSET = 0xFC000000
+#define _PHYS2VIRT(x) ((xm_u32_t)(x)+CONFIG_XM_OFFSET-CONFIG_XM_LOAD_ADDR) // LAddr = 0x1000000 XM_OFFSET = 0xFC000000
 
 extern xmAddress_t _pgTables[];
 #else
