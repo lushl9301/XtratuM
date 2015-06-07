@@ -24,37 +24,46 @@
 #include <arch/xm_def.h>
 #include <arch/processor.h>
 
-void _VBOOT SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames) {
-    xmAddress_t st, end, page;
-    xmAddress_t *rsvPages;
-    xm_s32_t e, noPages;
-    xm_u32_t *pgTable;
+void SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames)
+{
+	xmAddress_t st, end, page;
+	xmAddress_t *rsvPages;
+	xm_s32_t e, noPages;
+	xm_u32_t *pgTable;
 
-    st=xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].startAddr;
-    end=st+xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].size-1;
+	st = xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].startAddr;
+	end = st + xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].size - 1;
 
-    *stFrameArea=ROUNDUP(_PHYS2VIRT(end+1), LPAGE_SIZE); // LPAGE_SIZE = 4*1024*1024
-    *noFrames=((XM_VMAPEND-*stFrameArea)+1)/PAGE_SIZE; // PAGE_SIZE = 4096
+	*stFrameArea = ROUNDUP(_PHYS2VIRT(end+1), LPAGE_SIZE); // LPAGE_SIZE = 4*1024*1024
+	*noFrames = ((XM_VMAPEND - *stFrameArea) + 1) / PAGE_SIZE; // PAGE_SIZE = 4096
 
-    pgTable = (xm_u32_t *)_PHYS2VIRT(SaveCr3());
-    for (page=_PHYS2VIRT(st); page<_PHYS2VIRT(end); page+=LPAGE_SIZE) {
-        pgTable[VA2PtdL1(page)]=(_VIRT2PHYS(page)&LPAGE_MASK)|_PG_ARCH_PRESENT|_PG_ARCH_PSE|_PG_ARCH_RW|_PG_ARCH_GLOBAL;
-        pgTable[VA2PtdL1(_VIRT2PHYS(page))]=(_VIRT2PHYS(page)&LPAGE_MASK)|_PG_ARCH_PRESENT|_PG_ARCH_PSE|_PG_ARCH_RW|_PG_ARCH_GLOBAL;
-    }
-    //memset((void *)((xmAddress_t)pgTable+PAGE_SIZE), 0, PTDL2SIZE);
-    //pgTable[VA2PtdL1(*stFrameArea)]=(_VIRT2PHYS((xmAddress_t)pgTable+PAGE_SIZE)&PAGE_MASK)|_PG_ARCH_RW|_PG_ARCH_PRESENT;
-    FlushTlb(); /* XXX: The XtratuM mappings have changed. This is required to update the TLB entries */
+	pgTable = (xm_u32_t *)_PHYS2VIRT(SaveCr3());
+	for (page = _PHYS2VIRT(st); page < _PHYS2VIRT(end); page += LPAGE_SIZE) {
+		pgTable[VA2PtdL1(page)] = (_VIRT2PHYS(page) & LPAGE_MASK)
+				| _PG_ARCH_PRESENT
+				| _PG_ARCH_PSE
+				| _PG_ARCH_RW
+				| _PG_ARCH_GLOBAL;
+		pgTable[VA2PtdL1(_VIRT2PHYS(page))] = (_VIRT2PHYS(page) & LPAGE_MASK)
+				| _PG_ARCH_PRESENT
+				| _PG_ARCH_PSE
+				| _PG_ARCH_RW
+				| _PG_ARCH_GLOBAL;
+	}
+	//memset((void *)((xmAddress_t)pgTable+PAGE_SIZE), 0, PTDL2SIZE);
+	//pgTable[VA2PtdL1(*stFrameArea)]=(_VIRT2PHYS((xmAddress_t)pgTable+PAGE_SIZE)&PAGE_MASK)|_PG_ARCH_RW|_PG_ARCH_PRESENT;
+	FlushTlb(); /* XXX: The XtratuM mappings have changed. This is required to update the TLB entries */
 
-    noPages=(((XM_VMAPEND-*stFrameArea)+1)>>PTDL1_SHIFT);
-    GET_MEMAZ(rsvPages, PTDL2SIZE*noPages, PTDL2SIZE);
-    //memset(rsvPages, 0, PTDL2SIZE*noPages);
-    for (e=VA2PtdL1(*stFrameArea); (e<PTDL1ENTRIES)&&(noPages>0); e++) {
-        ASSERT(noPages>=0);
-        pgTable[e]=(_VIRT2PHYS(rsvPages)&PAGE_MASK)|_PG_ARCH_PRESENT|_PG_ARCH_RW;
-        rsvPages=(xmAddress_t *)((xmAddress_t)rsvPages+PTDL2SIZE);
-        noPages--;
-    }
-    FlushTlbGlobal();
+	noPages = (((XM_VMAPEND - *stFrameArea) + 1) >> PTDL1_SHIFT);
+	GET_MEMAZ(rsvPages, PTDL2SIZE*noPages, PTDL2SIZE);
+	//memset(rsvPages, 0, PTDL2SIZE*noPages);
+	for (e = VA2PtdL1(*stFrameArea); (e < PTDL1ENTRIES) && (noPages > 0); e++) {
+		ASSERT(noPages>=0);
+		pgTable[e] = (_VIRT2PHYS(rsvPages) & PAGE_MASK) | _PG_ARCH_PRESENT | _PG_ARCH_RW;
+		rsvPages = (xmAddress_t *)((xmAddress_t)rsvPages + PTDL2SIZE);
+		noPages--;
+	}
+	FlushTlbGlobal();
 }
 
 void SetupPtdL1(xmWord_t *ptdL1, kThread_t *k) {
