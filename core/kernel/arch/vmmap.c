@@ -69,35 +69,49 @@ void SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames)
 	FlushTlbGlobal();
 }
 
-void SetupPtdL1(xmWord_t *ptdL1, kThread_t *k) {
-    xm_s32_t l1e, e;
+void SetupPtdL1(xmWord_t *ptdL1, kThread_t *k)
+{
+	xm_s32_t l1e, e;
 
-    l1e = VA2PtdL1(CONFIG_XM_OFFSET);
-    for (e = l1e; e < PTDL1ENTRIES; e++)
-        ptdL1[e] = _pgTables[e];
+	l1e = VA2PtdL1(CONFIG_XM_OFFSET);
+	for (e = l1e; e < PTDL1ENTRIES; e++)
+		ptdL1[e] = _pgTables[e];
 }
 
-xm_u32_t VmArchAttr2Attr(xm_u32_t entry) {
-    xm_u32_t flags=entry&(PAGE_SIZE-1), attr=0;
+xm_u32_t VmArchAttr2Attr(xm_u32_t entry)
+{
+	xm_u32_t flags = entry & (PAGE_SIZE - 1), attr = 0;
 
-    if (flags&_PG_ARCH_PRESENT) attr|=_PG_ATTR_PRESENT;
-    if (flags&_PG_ARCH_USER) attr|=_PG_ATTR_USER;
-    if (flags&_PG_ARCH_RW) attr|=_PG_ATTR_RW;
-    if (!(flags&_PG_ARCH_PCD)) attr|=_PG_ATTR_CACHED;
-    return attr|(flags&~(_PG_ARCH_PRESENT|_PG_ARCH_USER|_PG_ARCH_RW|_PG_ARCH_PCD));
+	if (flags & _PG_ARCH_PRESENT)
+		attr |= _PG_ATTR_PRESENT;
+	if (flags & _PG_ARCH_USER)
+		attr |= _PG_ATTR_USER;
+	if (flags & _PG_ARCH_RW)
+		attr |= _PG_ATTR_RW;
+	if (!(flags & _PG_ARCH_PCD))
+		attr |= _PG_ATTR_CACHED;
+	return attr | (flags & ~(_PG_ARCH_PRESENT | _PG_ARCH_USER | _PG_ARCH_RW | _PG_ARCH_PCD));
 }
 
-xm_u32_t VmAttr2ArchAttr(xm_u32_t flags) {
-    xm_u32_t attr=0;
+xm_u32_t VmAttr2ArchAttr(xm_u32_t flags)
+{
+	xm_u32_t attr = 0;
 
-    if (flags&_PG_ATTR_PRESENT) attr|=_PG_ARCH_PRESENT;        
-    if (flags&_PG_ATTR_USER) attr|=_PG_ARCH_USER;  
-    if (flags&_PG_ATTR_RW) attr|=_PG_ARCH_RW;
-    if (!(flags&_PG_ATTR_CACHED)) attr|=_PG_ARCH_PCD;
-    return attr|(flags&0xffff);
+	if (flags & _PG_ATTR_PRESENT)
+		attr |= _PG_ARCH_PRESENT;
+	if (flags & _PG_ATTR_USER)
+		attr |= _PG_ARCH_USER;
+	if (flags & _PG_ATTR_RW)
+		attr |= _PG_ARCH_RW;
+	if (!(flags & _PG_ATTR_CACHED))
+		attr |= _PG_ARCH_PCD;
+	return attr | (flags & 0xffff);
 }
 
-xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAddress_t vAddr, xm_u32_t flags, xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *), xmAddress_t *pool, xmSSize_t *poolSize) {
+xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAddress_t vAddr, xm_u32_t flags,
+		xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *),
+		xmAddress_t *pool, xmSSize_t *poolSize)
+{
     struct physPage *pagePtdL2;
     xmAddress_t pT;
     xmWord_t *pPtdL2;
@@ -128,13 +142,13 @@ xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAdd
         ASSERT(pagePtdL2->counter>0);
         pPtdL2=VCacheMapPage(pT, pagePtdL2);
     }
-    pPtdL2[l2e]=(pAddr&PAGE_MASK)|VmAttr2ArchAttr(flags);  
+    pPtdL2[l2e]=(pAddr&PAGE_MASK)|VmAttr2ArchAttr(flags);
     VCacheUnlockPage(pagePtdL2);
 
     return 0;
 }
 
-void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags) {    
+void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags) {
     xmAddress_t *ptdLx;
     //xmAddress_t *pgTab;
     ASSERT(!(pAddr&(PAGE_SIZE-1)));
