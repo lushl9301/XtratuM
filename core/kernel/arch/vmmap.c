@@ -34,6 +34,7 @@ void SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames)
 	st = xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].startAddr;
 	end = st + xmcPhysMemAreaTab[xmcTab.hpv.physicalMemoryAreasOffset].size - 1;
 
+	///??? why use "end"
 	*stFrameArea = ROUNDUP(_PHYS2VIRT(end+1), LPAGE_SIZE); // LPAGE_SIZE = 4*1024*1024
 	*noFrames = ((XM_VMAPEND - *stFrameArea) + 1) / PAGE_SIZE; // PAGE_SIZE = 4096
 
@@ -59,7 +60,9 @@ void SetupVmMap(xmAddress_t *stFrameArea, xm_s32_t *noFrames)
 	//memset(rsvPages, 0, PTDL2SIZE*noPages);
 	for (e = VA2PtdL1(*stFrameArea); (e < PTDL1ENTRIES) && (noPages > 0); e++) {
 		ASSERT(noPages>=0);
-		pgTable[e] = (_VIRT2PHYS(rsvPages) & PAGE_MASK) | _PG_ARCH_PRESENT | _PG_ARCH_RW;
+		pgTable[e] = (_VIRT2PHYS(rsvPages) & PAGE_MASK)
+				| _PG_ARCH_PRESENT
+				| _PG_ARCH_RW;
 		rsvPages = (xmAddress_t *)((xmAddress_t)rsvPages + PTDL2SIZE);
 		noPages--;
 	}
