@@ -112,40 +112,40 @@ xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAdd
 		xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *),
 		xmAddress_t *pool, xmSSize_t *poolSize)
 {
-    struct physPage *pagePtdL2;
-    xmAddress_t pT;
-    xmWord_t *pPtdL2;
-    xm_s32_t l1e, l2e, e;
+	struct physPage *pagePtdL2;
+	xmAddress_t pT;
+	xmWord_t *pPtdL2;
+	xm_s32_t l1e, l2e, e;
 
-    ASSERT(!(pAddr&(PAGE_SIZE-1)));
-    ASSERT(!(vAddr&(PAGE_SIZE-1)));
-    ASSERT(vAddr<CONFIG_XM_OFFSET);
-    l1e=VA2PtdL1(vAddr);
-    l2e=VA2PtdL2(vAddr);
-    if (!(ptdL1[l1e]&_PG_ARCH_PRESENT)) {
-        pT=alloc(k->cfg, PTDL2SIZE, PTDL2SIZE, pool, poolSize);
-        if (!(pagePtdL2=PmmFindPage(pT, k, 0))) {
-            return -1;
-        }
-        pagePtdL2->type=PPAG_PTDL2;
-        PPagIncCounter(pagePtdL2);
-        pPtdL2=VCacheMapPage(pT, pagePtdL2);
-        for (e=0; e<PTDL2ENTRIES; ++e) {
-            pPtdL2[e]=0;
-        }
-        ptdL1[l1e]=pT|_PG_ARCH_PRESENT|_PG_ARCH_RW;
-    } else {
-        pT=ptdL1[l1e]&PAGE_MASK;
-        pagePtdL2=PmmFindPage(pT, k, 0);
-        ASSERT(pagePtdL2);
-        ASSERT(pagePtdL2->type==PPAG_PTDL2);
-        ASSERT(pagePtdL2->counter>0);
-        pPtdL2=VCacheMapPage(pT, pagePtdL2);
-    }
-    pPtdL2[l2e]=(pAddr&PAGE_MASK)|VmAttr2ArchAttr(flags);
-    VCacheUnlockPage(pagePtdL2);
+	ASSERT(!(pAddr&(PAGE_SIZE-1)));
+	ASSERT(!(vAddr&(PAGE_SIZE-1)));
+	ASSERT(vAddr<CONFIG_XM_OFFSET);
+	l1e = VA2PtdL1(vAddr);
+	l2e = VA2PtdL2(vAddr);
+	if (!(ptdL1[l1e] & _PG_ARCH_PRESENT)) {
+		pT = alloc(k->cfg, PTDL2SIZE, PTDL2SIZE, pool, poolSize);
+		if (!(pagePtdL2 = PmmFindPage(pT, k, 0))) {
+			return -1;
+		}
+		pagePtdL2->type = PPAG_PTDL2;
+		PPagIncCounter(pagePtdL2);
+		pPtdL2 = VCacheMapPage(pT, pagePtdL2);
+		for (e = 0; e < PTDL2ENTRIES; ++e) {
+			pPtdL2[e] = 0;
+		}
+		ptdL1[l1e] = pT | _PG_ARCH_PRESENT | _PG_ARCH_RW;
+	} else {
+		pT = ptdL1[l1e] & PAGE_MASK;
+		pagePtdL2 = PmmFindPage(pT, k, 0);
+		ASSERT(pagePtdL2);
+		ASSERT(pagePtdL2->type==PPAG_PTDL2);
+		ASSERT(pagePtdL2->counter>0);
+		pPtdL2 = VCacheMapPage(pT, pagePtdL2);
+	}
+	pPtdL2[l2e] = (pAddr & PAGE_MASK) | VmAttr2ArchAttr(flags);
+	VCacheUnlockPage(pagePtdL2);
 
-    return 0;
+	return 0;
 }
 
 void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags) {
