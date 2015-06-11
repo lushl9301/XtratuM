@@ -119,7 +119,7 @@ static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmA
 	}
 
 	for (i = 0; i < xmcBootPartTab[p->cfg->id].noCustomFiles; i++) {
-		a = xmcBootPartTab[p->cfg->id].customFileTab[i].sAddr;
+		a = xmcBootPartTab[p->cfg->id].customFileTab[i].sAddr;  // start address
 		b = a + xmcBootPartTab[p->cfg->id].customFileTab[i].size - 1;
 		for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
 			if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT | _PG_ATTR_USER | _PG_ATTR_CACHED,
@@ -184,13 +184,13 @@ xmAddress_t SetupPageTable(partition_t *p, xmAddress_t pgTb, xmSize_t size)
 	attr = _PG_ATTR_PRESENT | _PG_ATTR_USER;
 	ASSERT(p->pctArraySize);
 	for (vAddr = XM_PCTRLTAB_ADDR, addr = (xmAddress_t)_VIRT2PHYS(p->pctArray);
-			addr < ((xmAddress_t)_VIRT2PHYS(p->pctArray) + p->pctArraySize); addr += PAGE_SIZE, vAddr +=
-					PAGE_SIZE) {
+			addr < ((xmAddress_t)_VIRT2PHYS(p->pctArray) + p->pctArraySize);
+			addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
 		if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size) < 0)
 			return ~0;
 	}
 
-//    xmAddress_t vAddrLdr=CONFIG_XM_OFFSET+16*1024*1024;
+//	xmAddress_t vAddrLdr=CONFIG_XM_OFFSET+16*1024*1024;
 	xmAddress_t vAddrLdr = XM_PCTRLTAB_ADDR - 256 * 1024;
 	if (SetupLdr(p, pPtdL1, vAddrLdr, pgTb, size) < 0)
 		return ~0;
