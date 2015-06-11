@@ -108,6 +108,8 @@ xm_u32_t VmAttr2ArchAttr(xm_u32_t flags)
 	return attr | (flags & 0xffff);
 }
 
+
+///???
 xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAddress_t vAddr, xm_u32_t flags,
 		xmAddress_t (*alloc)(struct xmcPartition *, xmSize_t, xm_u32_t, xmAddress_t *, xmSSize_t *),
 		xmAddress_t *pool, xmSSize_t *poolSize)
@@ -148,20 +150,21 @@ xm_s32_t VmMapUserPage(partition_t *k, xmWord_t *ptdL1, xmAddress_t pAddr, xmAdd
 	return 0;
 }
 
-void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags) {
-    xmAddress_t *ptdLx;
-    //xmAddress_t *pgTab;
-    ASSERT(!(pAddr&(PAGE_SIZE-1)));
-    ASSERT(!(vAddr&(PAGE_SIZE-1)));
-    ASSERT(vAddr>=CONFIG_XM_OFFSET);
+void VmMapPage(xmAddress_t pAddr, xmAddress_t vAddr, xmWord_t flags)
+{
+	xmAddress_t *ptdLx;
+	//xmAddress_t *pgTab;
+	ASSERT(!(pAddr&(PAGE_SIZE-1)));
+	ASSERT(!(vAddr&(PAGE_SIZE-1)));
+	ASSERT(vAddr>=CONFIG_XM_OFFSET);
 
-    //pgTab = //(xm_u32_t *)_PHYS2VIRT(SaveCr3());
-    ASSERT((_pgTables[VA2PtdL1(vAddr)]&_PG_ARCH_PRESENT)==_PG_ARCH_PRESENT);
+	//pgTab = //(xm_u32_t *)_PHYS2VIRT(SaveCr3());
+	ASSERT((_pgTables[VA2PtdL1(vAddr)]&_PG_ARCH_PRESENT)==_PG_ARCH_PRESENT);
 
-    ptdLx=(xmAddress_t *)_PHYS2VIRT(_pgTables[VA2PtdL1(vAddr)]&PAGE_MASK);
-    //  ASSERT((ptdLx[VA2PtdL2(vAddr)]&_PG_ARCH_PRESENT)!=_PG_ARCH_PRESENT);
-    ptdLx[VA2PtdL2(vAddr)]=pAddr|VmAttr2ArchAttr(flags);
-    FlushTlbEntry(vAddr);
+	ptdLx = (xmAddress_t *)_PHYS2VIRT(_pgTables[VA2PtdL1(vAddr)]&PAGE_MASK);
+	//  ASSERT((ptdLx[VA2PtdL2(vAddr)]&_PG_ARCH_PRESENT)!=_PG_ARCH_PRESENT);
+	ptdLx[VA2PtdL2(vAddr)] = pAddr | VmAttr2ArchAttr(flags);
+	FlushTlbEntry(vAddr);
 }
 
 #if 0
