@@ -31,28 +31,32 @@ static inline xmAddress_t VAddr2PAddr(struct xmcMemoryArea *mAreas, xm_s32_t noA
 	return -1;
 }
 
-static xmAddress_t AllocMem(struct xmcPartition *cfg, xmSize_t size, xm_u32_t align, xmAddress_t *pool, xmSSize_t *maxSize) {
-    xmAddress_t addr;
-    xm_s32_t e;
-    
-    if (*pool&(align-1)) {
-        *maxSize-=align-(*pool&(align-1));
-        *pool=align+(*pool&~(align-1));
-    }
+static xmAddress_t AllocMem(struct xmcPartition *cfg, xmSize_t size, xm_u32_t align, xmAddress_t *pool,
+		xmSSize_t *maxSize)
+{
+	xmAddress_t addr;
+	xm_s32_t e;
 
-    addr=*pool;
-    *pool+=size;
-    if ((*maxSize-=size)<0){
-        kprintf("[SetupPageTable] partition page table couldn't be created\n");
-        return ~0;
-    }
+	if (*pool & (align - 1)) {
+		// put not aligned mem in use
+		*maxSize -= align - (*pool & (align - 1));
+		*pool = align + (*pool & ~(align - 1));
+	}
 
-    for (e=0; e<size; e+=sizeof(xm_u32_t)) {
-        WriteByPassMmuWord((void *)(addr+e), 0);
-    }
+	addr = *pool;
+	*pool += size;
+	if ((*maxSize -= size) < 0) {
+		kprintf("[SetupPageTable] partition page table couldn't be created\n");
+		return ~0;
+	}
 
-    addr=VAddr2PAddr(&xmcPhysMemAreaTab[cfg->physicalMemoryAreasOffset], cfg->noPhysicalMemoryAreas, addr);
-    return addr;
+	for (e = 0; e < size; e += sizeof(xm_u32_t)) {
+		WriteByPassMmuWord((void *)(addr + e), 0);
+	}
+
+	addr = VAddr2PAddr(&xmcPhysMemAreaTab[cfg->physicalMemoryAreasOffset], cfg->noPhysicalMemoryAreas, addr);
+	return addr;
+	///??? return paddr; taken as pT? so strange
 }
 
 static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmAddress_t pgTb, xmSize_t size){
