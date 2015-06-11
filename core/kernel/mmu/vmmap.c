@@ -21,12 +21,14 @@
 #include <arch/physmm.h>
 #include <arch/paging.h>
 
-static inline xmAddress_t VAddr2PAddr(struct xmcMemoryArea *mAreas, xm_s32_t noAreas, xmAddress_t vAddr) {
-    xm_s32_t e;
-    for (e=0; e<noAreas; e++)
-        if ((mAreas[e].mappedAt<=vAddr)&&(((mAreas[e].mappedAt+mAreas[e].size)-1)>=vAddr))
-            return vAddr-mAreas[e].mappedAt+mAreas[e].startAddr;
-    return -1;
+static inline xmAddress_t VAddr2PAddr(struct xmcMemoryArea *mAreas, xm_s32_t noAreas, xmAddress_t vAddr)
+{
+	xm_s32_t e;
+	for (e = 0; e < noAreas; e++)
+		if ((mAreas[e].mappedAt <= vAddr) && (((mAreas[e].mappedAt + mAreas[e].size) - 1) >= vAddr))
+			// startAddr means start at physical address
+			return vAddr - mAreas[e].mappedAt + mAreas[e].startAddr;
+	return -1;
 }
 
 static xmAddress_t AllocMem(struct xmcPartition *cfg, xmSize_t size, xm_u32_t align, xmAddress_t *pool, xmSSize_t *maxSize) {
