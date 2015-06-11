@@ -73,7 +73,8 @@ static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmA
 
 	/*Partition Loader Stack*/
 	if (!(p->vLdrStack)) {
-		GET_MEMA(stack, 18*PAGE_SIZE, PAGE_SIZE); ///??? 18?
+		GET_MEMA(stack, 18*PAGE_SIZE, PAGE_SIZE);
+		///??? 18?
 		p->vLdrStack = (xmAddress_t)stack;
 	} else
 		stack = (void *)p->vLdrStack;
@@ -106,7 +107,7 @@ static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmA
 	/*Mapping partition image from container*/
 	a = xmcBootPartTab[p->cfg->id].imgStart;
 	b = a + (xmcBootPartTab[p->cfg->id].imgSize) - 1;
-//	vAddr=at+256*1024;
+//	vAddr = at + 256 * 1024;
 	vAddr = a;
 	p->imgStart = vAddr;
 	for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
@@ -133,93 +134,94 @@ static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmA
 	return 0;
 }
 
-xmAddress_t SetupPageTable(partition_t *p, xmAddress_t pgTb, xmSize_t size) {
-    xmAddress_t addr, vAddr=0, a, b, pT;
-    xmWord_t *pPtdL1, attr;
-    struct physPage *pagePtdL1, *page;
-    xm_s32_t e;
+xmAddress_t SetupPageTable(partition_t *p, xmAddress_t pgTb, xmSize_t size)
+{
+	xmAddress_t addr, vAddr = 0, a, b, pT;
+	xmWord_t *pPtdL1, attr;
+	struct physPage *pagePtdL1, *page;
+	xm_s32_t e;
 
-    if ((pT=AllocMem(p->cfg, PTDL1SIZE, PTDL1SIZE, &pgTb, &size))==~0) {
-        PWARN("(%d) Unable to create page table (out of memory)\n", p->cfg->id);
-        return ~0;
-    }
-
-    if (!(pagePtdL1=PmmFindPage(pT, p, 0))) {
-        PWARN("(%d) Page 0x%x does not belong to this partition\n", p->cfg->id, pT);
-        return ~0;
-    }
-
-    pagePtdL1->type=PPAG_PTDL1;
-
-    // Incremented because it is load as the initial page table
-    PPagIncCounter(pagePtdL1);    
-    pPtdL1=VCacheMapPage(pT, pagePtdL1);
-    ASSERT(PTDL1SIZE<=PAGE_SIZE);
-    for (e=0; e<PTDL1ENTRIES; e++)
-        WriteByPassMmuWord(&pPtdL1[e], 0);
-
-    for (e=0; e<p->cfg->noPhysicalMemoryAreas; e++) {
-        if (xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].flags&XM_MEM_AREA_UNMAPPED)
- 	    continue;
-
-        a=xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].startAddr;
-        b=a+xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].size-1;
-        vAddr=xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].mappedAt;
-        for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-            attr=_PG_ATTR_PRESENT|_PG_ATTR_USER;
-            
-            if (!(xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].flags&XM_MEM_AREA_UNCACHEABLE))
-                attr|=_PG_ATTR_CACHED;
-            
-            if (!(xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].flags&XM_MEM_AREA_READONLY))
-                attr|=_PG_ATTR_RW;
-
-            if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size)<0)
-                return ~0;
+	if ((pT = AllocMem(p->cfg, PTDL1SIZE, PTDL1SIZE, &pgTb, &size)) == ~0) {
+		PWARN("(%d) Unable to create page table (out of memory)\n", p->cfg->id);
+		return ~0;
 	}
-    }
 
+	if (!(pagePtdL1 = PmmFindPage(pT, p, 0))) {
+		PWARN("(%d) Page 0x%x does not belong to this partition\n", p->cfg->id, pT);
+		return ~0;
+	}
 
-    attr=_PG_ATTR_PRESENT|_PG_ATTR_USER;
-    ASSERT(p->pctArraySize);
-    for (vAddr=XM_PCTRLTAB_ADDR, addr=(xmAddress_t)_VIRT2PHYS(p->pctArray);
-         addr<((xmAddress_t)_VIRT2PHYS(p->pctArray)+p->pctArraySize);
-         addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-        if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size)<0)
-            return ~0;
-    }
+	pagePtdL1->type = PPAG_PTDL1;
+
+	// Incremented because it is load as the initial page table
+	PPagIncCounter(pagePtdL1);
+	pPtdL1 = VCacheMapPage(pT, pagePtdL1);
+	ASSERT(PTDL1SIZE<=PAGE_SIZE);
+	for (e = 0; e < PTDL1ENTRIES; e++)
+		WriteByPassMmuWord(&pPtdL1[e], 0);
+
+	for (e = 0; e < p->cfg->noPhysicalMemoryAreas; e++) {
+		if (xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].flags & XM_MEM_AREA_UNMAPPED)
+			continue;
+
+		a = xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].startAddr;
+		b = a + xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].size - 1;
+		vAddr = xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].mappedAt;
+		for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+			attr = _PG_ATTR_PRESENT | _PG_ATTR_USER;
+
+			if (!(xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].flags & XM_MEM_AREA_UNCACHEABLE))
+				attr |= _PG_ATTR_CACHED;
+
+			if (!(xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].flags & XM_MEM_AREA_READONLY))
+				attr |= _PG_ATTR_RW;
+
+			if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size) < 0)
+				return ~0;
+		}
+	}
+
+	attr = _PG_ATTR_PRESENT | _PG_ATTR_USER;
+	ASSERT(p->pctArraySize);
+	for (vAddr = XM_PCTRLTAB_ADDR, addr = (xmAddress_t)_VIRT2PHYS(p->pctArray);
+			addr < ((xmAddress_t)_VIRT2PHYS(p->pctArray) + p->pctArraySize); addr += PAGE_SIZE, vAddr +=
+					PAGE_SIZE) {
+		if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size) < 0)
+			return ~0;
+	}
 
 //    xmAddress_t vAddrLdr=CONFIG_XM_OFFSET+16*1024*1024;
-    xmAddress_t vAddrLdr=XM_PCTRLTAB_ADDR-256*1024;
-    if (SetupLdr(p, pPtdL1,vAddrLdr,pgTb, size)<0)
-       return ~0;
+	xmAddress_t vAddrLdr = XM_PCTRLTAB_ADDR - 256 * 1024;
+	if (SetupLdr(p, pPtdL1, vAddrLdr, pgTb, size) < 0)
+		return ~0;
 
-    attr=_PG_ATTR_PRESENT|_PG_ATTR_USER;
-    // Set appropriate permissions
-    for (e=0; e<p->cfg->noPhysicalMemoryAreas; e++) {
-        if (xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].flags&XM_MEM_AREA_UNMAPPED)
-            continue;
+	attr = _PG_ATTR_PRESENT | _PG_ATTR_USER;
+	// Set appropriate permissions
+	for (e = 0; e < p->cfg->noPhysicalMemoryAreas; e++) {
+		if (xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].flags & XM_MEM_AREA_UNMAPPED)
+			continue;
 
-        a=xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].startAddr;
-        b=a+xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].size-1;
-        vAddr=xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].mappedAt;
-        for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-            if ((page=PmmFindPage(addr, p, 0))) {
-                PPagIncCounter(page);
-                if (xmcPhysMemAreaTab[e+p->cfg->physicalMemoryAreasOffset].flags&XM_MEM_AREA_UNCACHEABLE)
-                    attr&=~_PG_ATTR_CACHED;
-                else
-                    attr|=_PG_ATTR_CACHED;
+		a = xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].startAddr;
+		b = a + xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].size - 1;
+		vAddr = xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].mappedAt;
+		for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+			if ((page = PmmFindPage(addr, p, 0))) {
+				PPagIncCounter(page);
+				if (xmcPhysMemAreaTab[e + p->cfg->physicalMemoryAreasOffset].flags
+						& XM_MEM_AREA_UNCACHEABLE)
+					attr &= ~_PG_ATTR_CACHED;
+				else
+					attr |= _PG_ATTR_CACHED;
 
-                if (page->type!=PPAG_STD) {
-                    if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size)<0)
-                        return ~0;
-                }
-            }
-        }
-    }
+				if (page->type != PPAG_STD) {
+					if (VmMapUserPage(p, pPtdL1, addr, vAddr, attr, AllocMem, &pgTb, &size) < 0)
+						return ~0;
+				}
+			}
+		}
+	}
 
-    VCacheUnlockPage(pagePtdL1);
-  return pT;
+	VCacheUnlockPage(pagePtdL1);
+	return pT;
 }
 
