@@ -59,73 +59,78 @@ static xmAddress_t AllocMem(struct xmcPartition *cfg, xmSize_t size, xm_u32_t al
 	///??? return paddr; taken as pT? so strange
 }
 
-static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmAddress_t pgTb, xmSize_t size){
-    extern xm_u8_t _sldr[], _eldr[];
-    xmAddress_t addr,vAddr=0, a, b;
-    struct physPage *page;
-    void *stack;
-    xmWord_t attr;
-    xm_s32_t i;
+static inline int SetupLdr(partition_t *p, xmWord_t *pPtdL1, xmAddress_t at, xmAddress_t pgTb, xmSize_t size)
+{
+	extern xm_u8_t _sldr[], _eldr[];
+	xmAddress_t addr, vAddr = 0, a, b;
+	struct physPage *page;
+	void *stack;
+	xmWord_t attr;
+	xm_s32_t i;
 
-    ASSERT(((xmAddress_t)_eldr-(xmAddress_t)_sldr)<=256*1024);
-    ASSERT(xmcBootPartTab[p->cfg->id].noCustomFiles<=CONFIG_MAX_NO_CUSTOMFILES);
+	ASSERT(((xmAddress_t)_eldr-(xmAddress_t)_sldr)<=256*1024);
+	ASSERT(xmcBootPartTab[p->cfg->id].noCustomFiles<=CONFIG_MAX_NO_CUSTOMFILES);
 
-    /*Partition Loader Stack*/
-    if (!(p->vLdrStack)){
-       GET_MEMA(stack, 18*PAGE_SIZE,PAGE_SIZE);
-       p->vLdrStack=(xmAddress_t)stack;
-    }
-    else
-       stack=(void *)p->vLdrStack;
+	/*Partition Loader Stack*/
+	if (!(p->vLdrStack)) {
+		GET_MEMA(stack, 18*PAGE_SIZE, PAGE_SIZE); ///??? 18?
+		p->vLdrStack = (xmAddress_t)stack;
+	} else
+		stack = (void *)p->vLdrStack;
 
-    a=_VIRT2PHYS(stack);
-    b=a+(18*PAGE_SIZE)-1;
-    vAddr=at-18*PAGE_SIZE;
+	a = _VIRT2PHYS(stack);
+	b = a + (18 * PAGE_SIZE) - 1;
+	vAddr = at - 18 * PAGE_SIZE;
 
-    for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-        if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT|_PG_ATTR_USER|_PG_ATTR_CACHED|_PG_ATTR_RW, AllocMem, &pgTb,&size)<0){
-           kprintf("[SetupLdr(P%d)] Error mapping the Partition Loader Stack\n",p->cfg->id);
-           return -1;
-        }
-    }
+	for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+		if (VmMapUserPage(p, pPtdL1, addr, vAddr,
+				_PG_ATTR_PRESENT | _PG_ATTR_USER | _PG_ATTR_CACHED | _PG_ATTR_RW, AllocMem, &pgTb,
+				&size) < 0) {
+			kprintf("[SetupLdr(P%d)] Error mapping the Partition Loader Stack\n", p->cfg->id);
+			return -1;
+		}
+	}
 
-    /*Partition Loader code*/
-    a=(xmAddress_t)_sldr;
-    b=a+(256*1024)-1;
-    vAddr=at;
-    for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-        if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT|_PG_ATTR_USER|_PG_ATTR_CACHED, AllocMem, &pgTb,&size)<0){
-           kprintf("[SetupLdr(P%d)] Error mapping the Partition Loader Code\n",p->cfg->id);
-           return -1;
-        }
-    }
+	/*Partition Loader code*/
+	a = (xmAddress_t)_sldr;
+	b = a + (256 * 1024) - 1;
+	vAddr = at;
+	for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+		if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT | _PG_ATTR_USER | _PG_ATTR_CACHED, AllocMem,
+				&pgTb, &size) < 0) {
+			kprintf("[SetupLdr(P%d)] Error mapping the Partition Loader Code\n", p->cfg->id);
+			return -1;
+		}
+	}
 
-    /*Mapping partition image from container*/
-    a = xmcBootPartTab[p->cfg->id].imgStart;
-    b = a+(xmcBootPartTab[p->cfg->id].imgSize)-1;
-//    vAddr=at+256*1024;
-    vAddr=a;
-    p->imgStart=vAddr;
-    for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-        if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT|_PG_ATTR_USER|_PG_ATTR_CACHED, AllocMem, &pgTb,&size)<0){
-           kprintf("[SetupLdr(P%d)] Error mapping the Partition image from container\n",p->cfg->id);
-           return -1;
-        }
-    }
+	/*Mapping partition image from container*/
+	a = xmcBootPartTab[p->cfg->id].imgStart;
+	b = a + (xmcBootPartTab[p->cfg->id].imgSize) - 1;
+//	vAddr=at+256*1024;
+	vAddr = a;
+	p->imgStart = vAddr;
+	for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+		if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT | _PG_ATTR_USER | _PG_ATTR_CACHED, AllocMem,
+				&pgTb, &size) < 0) {
+			kprintf("[SetupLdr(P%d)] Error mapping the Partition image from container\n", p->cfg->id);
+			return -1;
+		}
+	}
 
+	for (i = 0; i < xmcBootPartTab[p->cfg->id].noCustomFiles; i++) {
+		a = xmcBootPartTab[p->cfg->id].customFileTab[i].sAddr;
+		b = a + xmcBootPartTab[p->cfg->id].customFileTab[i].size - 1;
+		for (addr = a; (addr >= a) && (addr < b); addr += PAGE_SIZE, vAddr += PAGE_SIZE) {
+			if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT | _PG_ATTR_USER | _PG_ATTR_CACHED,
+					AllocMem, &pgTb, &size) < 0) {
+				kprintf("[SetupLdr(P%d)] Error mapping the CustomFile(%d) image from container\n",
+						p->cfg->id, i);
+				return -1;
+			}
+		}
+	}
 
-    for (i=0; i<xmcBootPartTab[p->cfg->id].noCustomFiles; i++){
-        a=xmcBootPartTab[p->cfg->id].customFileTab[i].sAddr;
-        b=a+xmcBootPartTab[p->cfg->id].customFileTab[i].size-1;
-        for (addr=a; (addr>=a)&&(addr<b); addr+=PAGE_SIZE, vAddr+=PAGE_SIZE) {
-            if (VmMapUserPage(p, pPtdL1, addr, vAddr, _PG_ATTR_PRESENT|_PG_ATTR_USER|_PG_ATTR_CACHED, AllocMem, &pgTb,&size)<0){
-               kprintf("[SetupLdr(P%d)] Error mapping the CustomFile(%d) image from container\n",p->cfg->id,i);
-               return -1;
-            }
-        }
-    }
-
-    return 0;
+	return 0;
 }
 
 xmAddress_t SetupPageTable(partition_t *p, xmAddress_t pgTb, xmSize_t size) {
