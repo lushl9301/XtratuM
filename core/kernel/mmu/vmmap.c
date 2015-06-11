@@ -38,7 +38,7 @@ static xmAddress_t AllocMem(struct xmcPartition *cfg, xmSize_t size, xm_u32_t al
 	xm_s32_t e;
 
 	if (*pool & (align - 1)) {
-		// put not aligned mem in use
+		// put not aligned mem ignored
 		*maxSize -= align - (*pool & (align - 1));
 		*pool = align + (*pool & ~(align - 1));
 	}
