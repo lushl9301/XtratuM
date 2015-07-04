@@ -128,7 +128,7 @@ void ResetSystem(xm_u32_t resetMode)
 {
 	extern xm_u32_t sysResetCounter[];
 	extern void start(void);
-	extern void _Reset(xmAddress_t);
+	extern void _Reset(xmAddress_t );
 	cpuCtxt_t ctxt;
 
 	ASSERT(!HwIsSti());
