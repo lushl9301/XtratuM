@@ -193,8 +193,8 @@ static kThread_t *GetReadyKThreadCyclic(struct schedData *schedData)
 				GET_CPU_ID(),
 				cyclic->slot,
 				xmcSchedCyclicSlotTab[slotTabEntry].partitionId,
-				cTime, xmcSchedCyclicSlotTab[slotTabEntry].sExec+cyclic->sExec,
-				xmcSchedCyclicSlotTab[slotTabEntry].eExec+cyclic->sExec);
+				cTime, xmcSchedCyclicSlotTab[slotTabEntry].sExec + cyclic->sExec,
+				xmcSchedCyclicSlotTab[slotTabEntry].eExec + cyclic->sExec);
 	} else {
 		kprintf("[%d] IDLE: %lld\n", GET_CPU_ID(), cTime);
 	}
@@ -219,15 +219,15 @@ static kThread_t *GetReadyKThreadCyclic(struct schedData *schedData)
 #ifdef CONFIG_FP_SCHED
 
 static kThread_t *GetReadyKThreadFP(struct schedData *schedData) {
-	struct fpData *fp=&schedData->fp;
-	kThread_t *newK=0;
+	struct fpData *fp = &schedData->fp;
+	kThread_t *newK = 0;
 	xm_s32_t e;
 
-	for (e=0; e<fp->noFpEntries; e++) {
-		newK=partitionTab[fp->fpTab[e].partitionId].kThread[fp->fpTab[e].vCpuId];
-		if (!AreKThreadFlagsSet(newK, KTHREAD_HALTED_F|KTHREAD_SUSPENDED_F)&&
-				AreKThreadFlagsSet(newK, KTHREAD_READY_F)) {
-			newK->ctrl.g->opMode=XM_OPMODE_NORMAL;
+	for (e = 0; e < fp->noFpEntries; e++) {
+		newK = partitionTab[fp->fpTab[e].partitionId].kThread[fp->fpTab[e].vCpuId];
+		if (!AreKThreadFlagsSet(newK, KTHREAD_HALTED_F|KTHREAD_SUSPENDED_F)
+				&& AreKThreadFlagsSet(newK, KTHREAD_READY_F)) {
+			newK->ctrl.g->opMode = XM_OPMODE_NORMAL;
 			return newK;
 		}
 	}
@@ -251,13 +251,13 @@ void __VBOOT InitSchedLocal(kThread_t *idle)
 	localSched_t *sched = GET_LOCAL_SCHED();
 #ifdef CONFIG_CYCLIC_SCHED
 #ifdef CONFIG_PLAN_EXTSYNC
-	extSync[GET_CPU_ID()]=0;
-	actExtSync[GET_CPU_ID()]=0;
+	extSync[GET_CPU_ID()] = 0;
+	actExtSync[GET_CPU_ID()] = 0;
 	xm_u32_t irqNr = xmcSchedCyclicPlanTab[xmcTab.hpv.cpuTab[GET_CPU_ID()].schedCyclicPlansOffset].extSync;
 	if (irqNr != -1) {
-		localCpu_t *lCpu=GET_LOCAL_CPU();
-		lCpu->globalIrqMask &=~(1<<irqNr); //Keep in mind the ext sync irq in the globalIrqMask
-		actExtSync[GET_CPU_ID()]=1;
+		localCpu_t *lCpu = GET_LOCAL_CPU();
+		lCpu->globalIrqMask &= ~(1<<irqNr); //Keep in mind the ext sync irq in the globalIrqMask
+		actExtSync[GET_CPU_ID()] = 1;
 		SetIrqHandler(irqNr, SchedSyncHandler, 0);
 		HwEnableIrq(irqNr);
 	}
@@ -269,20 +269,21 @@ void __VBOOT InitSchedLocal(kThread_t *idle)
 	sched->data = &schedDataTab[GET_CPU_ID()];
 	memset(sched->data, 0, sizeof(struct schedData));
 #ifdef CONFIG_CYCLIC_SCHED
-	InitKTimer(GET_CPU_ID(),&sched->data->cyclic.kTimer, (void (*)(struct kTimer *, void *))SetSchedPending, NULL, NULL);
-	sched->data->cyclic.slot=-1;
-	sched->data->cyclic.plan.new=&xmcSchedCyclicPlanTab[xmcTab.hpv.cpuTab[GET_CPU_ID()].schedCyclicPlansOffset];
-	sched->data->cyclic.plan.current=0;
-	sched->data->cyclic.plan.prev=0;
-	if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy==CYCLIC_SCHED)
-	sched->GetReadyKThread=GetReadyKThreadCyclic;
+	InitKTimer(GET_CPU_ID(),&sched->data->cyclic.kTimer, (void (*)(struct kTimer *, void *))SetSchedPending, NULL
+			, NULL);
+	sched->data->cyclic.slot = -1;
+	sched->data->cyclic.plan.new = &xmcSchedCyclicPlanTab[xmcTab.hpv.cpuTab[GET_CPU_ID()].schedCyclicPlansOffset];
+	sched->data->cyclic.plan.current = 0;
+	sched->data->cyclic.plan.prev = 0;
+	if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy == CYCLIC_SCHED)
+		sched->GetReadyKThread = GetReadyKThreadCyclic;
 #endif
 
 #ifdef CONFIG_FP_SCHED
-	sched->data->fp.fpTab=&xmcFpSchedTab[xmcTab.hpv.cpuTab[GET_CPU_ID()].schedFpTabOffset];
-	sched->data->fp.noFpEntries=xmcTab.hpv.cpuTab[GET_CPU_ID()].noFpEntries;
-	if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy==FP_SCHED)
-	sched->GetReadyKThread=GetReadyKThreadFP;
+	sched->data->fp.fpTab = &xmcFpSchedTab[xmcTab.hpv.cpuTab[GET_CPU_ID()].schedFpTabOffset];
+	sched->data->fp.noFpEntries = xmcTab.hpv.cpuTab[GET_CPU_ID()].noFpEntries;
+	if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy == FP_SCHED)
+		sched->GetReadyKThread = GetReadyKThreadFP;
 #endif
 }
 
@@ -322,19 +323,19 @@ void Schedule(void)
 #ifdef CONFIG_AUDIT_EVENTS
 		xmWord_t auditArgs;
 
-		auditArgs=(newK!=sched->idleKThread)?newK->ctrl.g->id:-1;
+		auditArgs = (newK != sched->idleKThread) ? newK->ctrl.g->id : -1;
 		RaiseAuditEvent(TRACE_SCHED_MODULE, AUDIT_SCHED_CONTEXT_SWITCH, 1, &auditArgs);
 #endif
 #if 0
 		if (newK->ctrl.g)
-		kprintf("newK: [%d:%d] 0x%x ", KID2PARTID(newK->ctrl.g->id), KID2VCPUID(newK->ctrl.g->id), newK);
+			kprintf("newK: [%d:%d] 0x%x ", KID2PARTID(newK->ctrl.g->id), KID2VCPUID(newK->ctrl.g->id), newK);
 		else
-		kprintf("newK: idle ");
+			kprintf("newK: idle ");
 
 		if (sched->cKThread->ctrl.g)
-		kprintf("curK: [%d:%d] 0x%x\n", KID2PARTID(sched->cKThread->ctrl.g->id), KID2VCPUID(sched->cKThread->ctrl.g->id));
+			kprintf("curK: [%d:%d] 0x%x\n", KID2PARTID(sched->cKThread->ctrl.g->id), KID2VCPUID(sched->cKThread->ctrl.g->id));
 		else
-		kprintf("curK: idle\n");
+			kprintf("curK: idle\n");
 #endif
 
 		SwitchKThreadArchPre(newK, sched->cKThread);
@@ -351,8 +352,8 @@ void Schedule(void)
 		if (newK->ctrl.g)
 			SetHwTimer(TraverseKTimerQueue(&newK->ctrl.localActiveKTimers, GetSysClockUsec()));
 #ifdef CONFIG_FP_SCHED
-		if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy==CYCLIC_SCHED) {
-			sched->cKThread->ctrl.irqMask=HwIrqGetMask();
+		if (xmcTab.hpv.cpuTab[GET_CPU_ID()].schedPolicy == CYCLIC_SCHED) {
+			sched->cKThread->ctrl.irqMask = HwIrqGetMask();
 		}
 		HwIrqSetMask(newK->ctrl.irqMask);
 #else
