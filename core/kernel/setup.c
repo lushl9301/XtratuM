@@ -128,7 +128,7 @@ void ResetSystem(xm_u32_t resetMode)
 {
 	extern xm_u32_t sysResetCounter[];
 	extern void start(void);
-	extern void _Reset(xmAddress_t );
+	extern void _Reset( xmAddress_t);
 	cpuCtxt_t ctxt;
 
 	ASSERT(!HwIsSti());
@@ -184,7 +184,7 @@ static void __VBOOT SetupPartitions(void)
 #if defined(CONFIG_DEV_TTNOC)||defined(CONFIG_DEV_TTNOC_MODULE)
 	updateInfoNode();
 	updateStateHyp(XM_STATUS_READY);
-//    sendStateToAllNodes();
+//	sendStateToAllNodes();
 #endif
 	kprintf("%d Partition(s) created\n", xmcTab.noPartitions);
 
@@ -225,7 +225,7 @@ static void __VBOOT SetupPartitions(void)
 	}
 #if defined(CONFIG_DEV_TTNOC)||defined(CONFIG_DEV_TTNOC_MODULE)
 	updateStateAllPart();
-//    sendStateToAllNodes();
+//	sendStateToAllNodes();
 	receiveInitStateFromAllNodes();
 #endif
 #ifdef CONFIG_FP_SCHED
