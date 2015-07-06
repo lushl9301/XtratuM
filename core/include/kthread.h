@@ -204,42 +204,6 @@ static inline void SetExtIrqPending(kThread_t *k, xm_s32_t irq)
 	SetKThreadFlags(k, KTHREAD_READY_F);
 }
 
-static inline int ArePartitionExtIrqPendingSet(partition_t *p, xm_s32_t irq)
-{
-	kThread_t *k;
-	xm_s32_t e;
-
-	ASSERT((irq>=XM_VT_EXT_FIRST)&&(irq<=XM_VT_EXT_LAST));
-	irq -= XM_VT_EXT_FIRST;
-
-	for (e = 0; e < p->cfg->noVCpus; e++) {
-		k = p->kThread[e];
-		SpinLock(&k->ctrl.lock);
-		if (!(k->ctrl.g->partCtrlTab->extIrqsPend & (1 << irq))) {
-			SpinUnlock(&k->ctrl.lock);
-			return 0;
-		}
-		SpinUnlock(&k->ctrl.lock);
-	}
-	return 1;
-
-}
-
-static inline int AreExtIrqPendingSet(kThread_t *k, xm_s32_t irq)
-{
-
-	ASSERT((irq>=XM_VT_EXT_FIRST)&&(irq<=XM_VT_EXT_LAST));
-	irq -= XM_VT_EXT_FIRST;
-
-	SpinLock(&k->ctrl.lock);
-	if (!(k->ctrl.g->partCtrlTab->extIrqsPend & (1 << irq))) {
-		SpinUnlock(&k->ctrl.lock);
-		return 0;
-	}
-	SpinUnlock(&k->ctrl.lock);
-	return 1;
-}
-
 static inline void SetPartitionExtIrqPending(partition_t *p, xm_s32_t irq)
 {
 	kThread_t *k;
@@ -262,6 +226,42 @@ static inline void SetPartitionExtIrqPending(partition_t *p, xm_s32_t irq)
 		 partitionStatus[k->ctrl.g->cfg->id].noVIrqs++;
 		 #endif*/
 	}
+}
+
+static inline int AreExtIrqPendingSet(kThread_t *k, xm_s32_t irq)
+{
+
+	ASSERT((irq>=XM_VT_EXT_FIRST)&&(irq<=XM_VT_EXT_LAST));
+	irq -= XM_VT_EXT_FIRST;
+
+	SpinLock(&k->ctrl.lock);
+	if (!(k->ctrl.g->partCtrlTab->extIrqsPend & (1 << irq))) {
+		SpinUnlock(&k->ctrl.lock);
+		return 0;
+	}
+	SpinUnlock(&k->ctrl.lock);
+	return 1;
+}
+
+static inline int ArePartitionExtIrqPendingSet(partition_t *p, xm_s32_t irq)
+{
+	kThread_t *k;
+	xm_s32_t e;
+
+	ASSERT((irq>=XM_VT_EXT_FIRST)&&(irq<=XM_VT_EXT_LAST));
+	irq -= XM_VT_EXT_FIRST;
+
+	for (e = 0; e < p->cfg->noVCpus; e++) {
+		k = p->kThread[e];
+		SpinLock(&k->ctrl.lock);
+		if (!(k->ctrl.g->partCtrlTab->extIrqsPend & (1 << irq))) {
+			SpinUnlock(&k->ctrl.lock);
+			return 0;
+		}
+		SpinUnlock(&k->ctrl.lock);
+	}
+	return 1;
+
 }
 
 extern void SetupKStack(kThread_t *k, void *StartUp, xmAddress_t entryPoint);
