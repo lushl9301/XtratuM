@@ -58,29 +58,28 @@ xmTime_t TraverseKTimerQueue(struct dynList *l, xmTime_t cTime)
 	xmTime_t nextAct = MAX_XMTIME;
 	kTimer_t *kTimer;
 
-	DYNLIST_FOR_EACH_ELEMENT_BEGIN(l, kTimer, 1)
-				{
-					ASSERT(kTimer);
-					if (kTimer->flags & KTIMER_ARMED) {
-						if (kTimer->value <= cTime) {
-							if (kTimer->Action)
-								kTimer->Action(kTimer, kTimer->actionArgs);
+	DYNLIST_FOR_EACH_ELEMENT_BEGIN(l, kTimer, 1) {
+		ASSERT(kTimer);
+		if (kTimer->flags & KTIMER_ARMED) {
+			if (kTimer->value <= cTime) {
+				if (kTimer->Action)
+					kTimer->Action(kTimer, kTimer->actionArgs);
 
-							if (kTimer->interval > 0) {
-								// To be optimised
-								do {
-									kTimer->value += kTimer->interval;
-								} while (kTimer->value <= cTime);
-								if (nextAct > kTimer->value)
-									nextAct = kTimer->value;
-							} else
-								kTimer->flags &= ~KTIMER_ARMED;
-						} else {
-							if (nextAct > kTimer->value)
-								nextAct = kTimer->value;
-						}
-					}
-				}DYNLIST_FOR_EACH_ELEMENT_END(l);
+				if (kTimer->interval > 0) {
+					// To be optimised
+					do {
+						kTimer->value += kTimer->interval;
+					} while (kTimer->value <= cTime);
+					if (nextAct > kTimer->value)
+						nextAct = kTimer->value;
+				} else
+					kTimer->flags &= ~KTIMER_ARMED;
+			} else {
+				if (nextAct > kTimer->value)
+					nextAct = kTimer->value;
+			}
+		}
+	} DYNLIST_FOR_EACH_ELEMENT_END(l);
 
 	return nextAct;
 }
