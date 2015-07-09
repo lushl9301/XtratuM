@@ -56,14 +56,14 @@ xm_s32_t SwitchSchedPlan(xm_s32_t newPlanId, xm_s32_t *oldPlanId)
 
 	*oldPlanId = -1;
 	if (sched->data->cyclic.plan.current)
-	*oldPlanId = sched->data->cyclic.plan.current->id;
+		*oldPlanId = sched->data->cyclic.plan.current->id;
 
 	for (e = 0; e < xmcTab.hpv.noCpus; e++) {
 		if (newPlanId < xmcTab.hpv.cpuTab[e].noSchedCyclicPlans)
-		localSchedInfo[e].data->cyclic.plan.new =
-		&xmcSchedCyclicPlanTab[xmcTab.hpv.cpuTab[e].schedCyclicPlansOffset + newPlanId];
+			localSchedInfo[e].data->cyclic.plan.new = 
+				&xmcSchedCyclicPlanTab[xmcTab.hpv.cpuTab[e].schedCyclicPlansOffset + newPlanId];
 		else
-		localSchedInfo[e].data->cyclic.plan.new = &idleCyclicPlanTab;
+			localSchedInfo[e].data->cyclic.plan.new = &idleCyclicPlanTab;
 	}
 
 #ifdef CONFIG_AUDIT_EVENTS
@@ -88,7 +88,7 @@ inline void MakePlanSwitch(xmTime_t cTime, struct cyclicData *cyclic)
 		updateStateHyp(XM_STATUS_READY);
 #endif
 		if (!cyclic->plan.new->majorFrame)
-		IdleTask();
+			IdleTask();
 #ifdef CONFIG_AUDIT_EVENTS
 		planIds[0] = cyclic->plan.current->id;
 		planIds[1] = cyclic->plan.new->id;
@@ -110,7 +110,8 @@ static kThread_t *GetReadyKThreadCyclic(struct schedData *schedData)
 #endif
 
 	if (cyclic->nextAct > cTime && !(cyclic->flags & RESCHED_ENABLED))
-	return (cyclic->kThread && !AreKThreadFlagsSet(cyclic->kThread, KTHREAD_HALTED_F | KTHREAD_SUSPENDED_F)
+		return (cyclic->kThread
+			&& !AreKThreadFlagsSet(cyclic->kThread, KTHREAD_HALTED_F | KTHREAD_SUSPENDED_F)
 			&& AreKThreadFlagsSet(cyclic->kThread, KTHREAD_READY_F)) ? cyclic->kThread : 0;
 
 	cyclic->flags &= ~RESCHED_ENABLED;
@@ -152,36 +153,36 @@ static kThread_t *GetReadyKThreadCyclic(struct schedData *schedData)
 
 	// Calculate our next slot
 	if (cyclic->slot >= plan->noSlots)
-	goto out;
-	// getting idle
+		goto out;
+		// getting idle
 
 	while (t >= xmcSchedCyclicSlotTab[plan->slotsOffset + cyclic->slot].eExec) {
 		cyclic->slot++;
 		if (cyclic->slot >= plan->noSlots)
-		goto out;
-		// getting idle
+			goto out;
+			// getting idle
 	}
 	slotTabEntry = plan->slotsOffset + cyclic->slot;
 
 	if (t >= xmcSchedCyclicSlotTab[slotTabEntry].sExec) {
 		ASSERT((xmcSchedCyclicSlotTab[slotTabEntry].partitionId>=0)
-				&& (xmcSchedCyclicSlotTab[slotTabEntry].partitionId<xmcTab.noPartitions));
+			&& (xmcSchedCyclicSlotTab[slotTabEntry].partitionId<xmcTab.noPartitions));
 		ASSERT(partitionTab[xmcSchedCyclicSlotTab[slotTabEntry].partitionId].kThread[xmcSchedCyclicSlotTab[slotTabEntry].vCpuId]);
-		newK =partitionTab[xmcSchedCyclicSlotTab[slotTabEntry].partitionId].kThread[xmcSchedCyclicSlotTab[slotTabEntry].vCpuId];
+		newK = partitionTab[xmcSchedCyclicSlotTab[slotTabEntry].partitionId].kThread[xmcSchedCyclicSlotTab[slotTabEntry].vCpuId];
 
 		if (!AreKThreadFlagsSet(newK, KTHREAD_HALTED_F | KTHREAD_SUSPENDED_F)
-				&& AreKThreadFlagsSet(newK, KTHREAD_READY_F)) {
+			&& AreKThreadFlagsSet(newK, KTHREAD_READY_F)) {
 			nextTime = xmcSchedCyclicSlotTab[slotTabEntry].eExec;
 		} else {
 			newK = 0;
 			if ((cyclic->slot + 1) < plan->noSlots)
-			nextTime = xmcSchedCyclicSlotTab[slotTabEntry + 1].sExec;
+				nextTime = xmcSchedCyclicSlotTab[slotTabEntry + 1].sExec;
 		}
 	} else {
 		nextTime = xmcSchedCyclicSlotTab[slotTabEntry].sExec;
 	}
 
-	out:
+out:
 //    ASSERT(cyclic->nextAct<(nextTime+cyclic->sExec));
 	cyclic->nextAct = nextTime + cyclic->sExec;
 	ArmKTimer(&cyclic->kTimer, cyclic->nextAct, 0);
@@ -204,7 +205,7 @@ static kThread_t *GetReadyKThreadCyclic(struct schedData *schedData)
 		newK->ctrl.g->partCtrlTab->schedInfo.noSlot = cyclic->slot;
 		newK->ctrl.g->partCtrlTab->schedInfo.id = xmcSchedCyclicSlotTab[slotTabEntry].id;
 		newK->ctrl.g->partCtrlTab->schedInfo.slotDuration = xmcSchedCyclicSlotTab[slotTabEntry].eExec
-		- xmcSchedCyclicSlotTab[slotTabEntry].sExec;
+									- xmcSchedCyclicSlotTab[slotTabEntry].sExec;
 		SetExtIrqPending(newK, XM_VT_EXT_CYCLIC_SLOT_START);
 	}
 
