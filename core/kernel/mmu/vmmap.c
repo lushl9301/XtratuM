@@ -23,6 +23,7 @@
 
 static inline xmAddress_t VAddr2PAddr(struct xmcMemoryArea *mAreas, xm_s32_t noAreas, xmAddress_t vAddr)
 {
+	///search all memory areas to find vaddr
 	xm_s32_t e;
 	for (e = 0; e < noAreas; e++)
 		if ((mAreas[e].mappedAt <= vAddr) && (((mAreas[e].mappedAt + mAreas[e].size) - 1) >= vAddr))
