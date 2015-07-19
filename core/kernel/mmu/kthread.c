@@ -25,6 +25,7 @@
 #include <xmef.h>
 #include <arch/xm_def.h>
 
-void SetupPctMm(partitionControlTable_t *partCtrlTab, kThread_t *k) {
-    partCtrlTab->arch._ARCH_PTDL1_REG=k->ctrl.g->kArch.ptdL1;
+void SetupPctMm(partitionControlTable_t *partCtrlTab, kThread_t *k)
+{
+	partCtrlTab->arch._ARCH_PTDL1_REG = k->ctrl.g->kArch.ptdL1;
 }

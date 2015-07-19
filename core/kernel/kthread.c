@@ -194,8 +194,8 @@ static inline void SetupPct(partitionControlTable_t *partCtrlTab, kThread_t *k, 
 	xm_s32_t e, resetCounter;
 	partition_t *p = GetPartition(k);
 
-	commPortBitmap =
-			(xmWord_t *)((xmAddress_t)memMap + sizeof(struct xmPhysicalMemMap) * cfg->noPhysicalMemoryAreas);
+	commPortBitmap = (xmWord_t *)((xmAddress_t)memMap
+		+ sizeof(struct xmPhysicalMemMap) * cfg->noPhysicalMemoryAreas);
 
 	resetCounter = partCtrlTab->resetCounter;
 	memset(partCtrlTab, 0, sizeof(partitionControlTable_t));
